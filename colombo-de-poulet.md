@@ -59,5 +59,5 @@ emoji: 🍛
 
 - **Colombo de cabri** : la version traditionnelle des fêtes, avec 3 kg de viande de cabri (chevreau) en morceaux (voir la recette de colombo de cabri).
 - **Colombo de porc** : avec 3 kg d'échine ou de palette de porc en cubes (voir la recette de colombo de porc).
-- **Colombo de poisson ou de crevettes** : le poisson ou les crevettes s'ajoutent à la toute fin, sur les légumes presque cuits (voir la recette de colombo de poisson).
+- **Colombo de poisson ou de crevettes** : le poisson ou les crevettes s'ajoutent à la toute fin, sur les légumes presque cuits (voir les recettes de colombo de poisson et de colombo de crevettes).
 - **Avec du giraumon** : remplacez une partie des pommes de terre par du giraumon (potiron), qui rend la sauce plus douce et plus onctueuse.

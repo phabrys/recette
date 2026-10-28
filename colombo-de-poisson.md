@@ -59,7 +59,7 @@ emoji: 🐠
 
 ## Variantes
 
-- **Colombo de crevettes** : remplacez le poisson par 2 kg de crevettes décortiquées, ajoutées pour les **5 dernières minutes** de cuisson seulement.
+- **Colombo de crevettes** : remplacez le poisson par 2 kg de crevettes décortiquées, ajoutées pour les **5 dernières minutes** de cuisson seulement (voir la recette de colombo de crevettes).
 - **Colombo de morue** : avec 1,5 kg de morue dessalée la veille dans plusieurs eaux, en gros morceaux, ajoutée pour les 10 dernières minutes. Ne salez pas la sauce.
 - **Colombo de requin** : le requin (ou le cazon) a une chair très ferme qui supporte bien la cuisson ; ajoutez-le 20 minutes avant la fin.
 - **Avec du giraumon** : remplacez une partie des pommes de terre par du giraumon (potiron), qui rend la sauce plus douce et plus onctueuse.
