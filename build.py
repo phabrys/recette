@@ -30,6 +30,7 @@ EMOJIS = {
     "genoise": "🎂",
     "brioche": "🍞",
     "pain-au-beurre": "🌴",
+    "flan-patissier": "🍮",
     "pizza": "🍕",
 }
 DEFAULT_EMOJI = "🍽️"
