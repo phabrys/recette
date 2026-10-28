@@ -58,6 +58,6 @@ emoji: 🍛
 ## Variantes
 
 - **Colombo de cabri** : la version traditionnelle des fêtes, avec 3 kg de viande de cabri (chevreau) en morceaux. Prolongez la cuisson à 1 h 30 avant d'ajouter les aubergines.
-- **Colombo de porc** : avec 3 kg d'échine ou de palette de porc en cubes, en prolongeant la cuisson de 30 minutes.
+- **Colombo de porc** : avec 3 kg d'échine ou de palette de porc en cubes (voir la recette de colombo de porc).
 - **Colombo de poisson ou de crevettes** : faites mijoter les légumes 30 minutes, puis ajoutez le poisson en gros morceaux ou les crevettes pour les 10 dernières minutes seulement.
 - **Avec du giraumon** : remplacez une partie des pommes de terre par du giraumon (potiron), qui rend la sauce plus douce et plus onctueuse.
