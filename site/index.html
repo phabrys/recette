@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mes recettes</title>
+<style>
+  :root {
+    --bg: #17120f;
+    --surface: #241c17;
+    --surface-2: #30261f;
+    --text: #f5ece3;
+    --muted: #bba999;
+    --accent: #f4a259;
+    --accent-ink: #1d130b;
+    --line: #42352b;
+    --gutter-x: 4vw;
+    --gutter-y: 3vh;
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 16px; font-size: clamp(14px, 1.6vw, 48px); }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+    line-height: 1.45;
+    overflow: hidden;
+  }
+  #app { height: 100vh; display: flex; flex-direction: column; }
+  strong { color: #ffd2a6; }
+  h1, h2, h3 { line-height: 1.15; margin: 0; }
+  button, a { font: inherit; color: inherit; }
+
+  /* En-tête commun */
+  .top {
+    display: flex; align-items: center; gap: 1.5rem;
+    padding: var(--gutter-y) var(--gutter-x) 1.2rem;
+    border-bottom: 1px solid var(--line);
+    flex: none;
+  }
+  .top .ttl { flex: 1; min-width: 0; }
+  .top h1 { font-size: 2.2rem; font-weight: 750; }
+  .top .sub { color: var(--muted); font-size: 1.1rem; margin: .2rem 0 0; }
+  .hint { color: var(--muted); font-size: .95rem; }
+
+  .btn {
+    background: var(--surface-2); border: 0.15rem solid transparent; border-radius: 0.8rem;
+    padding: .6rem 1.2rem; font-size: 1.1rem; font-weight: 600; cursor: pointer;
+    white-space: nowrap; text-decoration: none;
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); }
+  .nav:focus { outline: none; }
+  .btn:focus, .btn:hover { border-color: var(--text); }
+  .btn.primary:focus { box-shadow: 0 0 0 .25rem var(--text); }
+
+  * { scrollbar-color: var(--line) transparent; scrollbar-width: thin; }
+  ::-webkit-scrollbar { width: .5rem; }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: .25rem; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  .scroll { flex: 1; overflow-y: auto; padding: 1.8rem var(--gutter-x) var(--gutter-y); }
+
+  /* Accueil */
+  .grid {
+    display: grid; gap: 1.6rem;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    align-content: start;
+  }
+  .card {
+    display: flex; flex-direction: column; align-items: flex-start; gap: .5rem;
+    background: var(--surface); border-radius: 1.2rem; padding: 1.4rem;
+    border: .2rem solid transparent; text-decoration: none;
+    transition: transform .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .card:focus, .card:hover { border-color: var(--accent); background: var(--surface-2); transform: scale(1.04); }
+  .card .emoji { font-size: 3.2rem; line-height: 1; }
+  .card .ctitle { font-size: 1.45rem; font-weight: 700; }
+  .card .csub { color: var(--muted); font-size: 1rem; }
+
+  /* Fiche recette */
+  .recipe {
+    display: grid; gap: 2rem; align-content: start;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr);
+  }
+  .panel { background: var(--surface); border-radius: 1.2rem; padding: 1.4rem 1.6rem; }
+  .panel h2 { font-size: 1.5rem; color: var(--accent); margin-bottom: .8rem; }
+  .panel h3 { font-size: 1.15rem; margin: 1.1rem 0 .4rem; }
+  .panel p { margin: .4rem 0; font-size: 1.1rem; }
+  .panel ul { margin: 0; padding-left: 1.3rem; font-size: 1.15rem; }
+  .panel li { margin: .35rem 0; }
+  .panel li::marker { color: var(--accent); }
+  ol.steps { list-style: none; counter-reset: step; margin: 0; padding: 0; font-size: 1.2rem; }
+  ol.steps li { counter-increment: step; position: relative; padding-left: 3rem; margin: 0 0 1rem; min-height: 2.2rem; }
+  ol.steps li::before {
+    content: counter(step); position: absolute; left: 0; top: -.1rem;
+    width: 2.1rem; height: 2.1rem; border-radius: 50%;
+    background: var(--accent); color: var(--accent-ink); font-weight: 800;
+    display: flex; align-items: center; justify-content: center; font-size: 1.05rem;
+  }
+  .extras { grid-column: 1 / -1; display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr)); }
+  .extras ul { font-size: 1.05rem; }
+
+  /* Mode pas à pas */
+  .progress { height: .4rem; background: var(--surface-2); flex: none; }
+  .progress div { height: 100%; background: var(--accent); transition: width .25s ease; }
+  .stepmain {
+    flex: 1; min-height: 0; display: grid; gap: 2.5rem;
+    grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
+    padding: 2rem var(--gutter-x) 1rem;
+  }
+  .step { display: flex; flex-direction: column; min-height: 0; overflow-y: auto; }
+  .stepinner { margin: auto 0; }
+  .step .count { color: var(--accent); font-size: 1.3rem; font-weight: 700; letter-spacing: .03em; }
+  .step .label { color: var(--muted); font-size: 1.2rem; margin: .3rem 0 0; }
+  .step .stitle { font-size: 3.4rem; margin: 1rem 0 1.4rem; }
+  .step .sbody { font-size: 2.1rem; line-height: 1.4; margin: 0; }
+  .step .sbody.long { font-size: 1.65rem; }
+  .step .sbody.xlong { font-size: 1.4rem; }
+  .side { overflow-y: auto; margin: 0; }
+  .side ul { font-size: 1.05rem; }
+  .stepfoot {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 1rem var(--gutter-x) var(--gutter-y); flex: none;
+  }
+  .fade { animation: fade .25s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateX(1.5rem); } to { opacity: 1; transform: none; } }
+  .fade.rev { animation-name: fade-rev; }
+  @keyframes fade-rev { from { opacity: 0; transform: translateX(-1.5rem); } to { opacity: 1; transform: none; } }
+
+  /* Téléphone / petit écran */
+  @media (max-width: 700px) {
+    html { font-size: 15px; }
+    .top { flex-wrap: wrap; }
+    .top h1 { font-size: 1.6rem; }
+    .recipe, .stepmain { grid-template-columns: 1fr; }
+    .extras { grid-template-columns: 1fr; }
+    .step .stitle { font-size: 2rem; }
+    .step .sbody { font-size: 1.3rem; }
+    .stepmain { overflow-y: auto; }
+    .stepfoot .hint { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function () {
+  "use strict";
+  var RECIPES = [{"slug": "beignets", "name": "Beignets aux fruits", "nameHtml": "Beignets aux fruits", "subtitle": "environ 40 beignets", "emoji": "🍎", "ingredients": {"title": "Ingrédients", "subs": [{"title": "", "blocks": []}, {"title": "Pâte à beignets", "blocks": [{"t": "ul", "items": ["500 g de farine", "1 sachet de levure chimique (11 g)", "4 œufs", "50 cl de lait (ou 25 cl de lait + 25 cl de bière blonde)", "2 cuillères à soupe de sucre", "2 cuillères à soupe d'huile", "2 pincées de sel", "Facultatif : 2 cuillères à soupe de rhum ou de fleur d'oranger"]}]}, {"title": "Garniture et cuisson", "blocks": [{"t": "ul", "items": ["6 à 8 pommes (ou bananes, ananas, poires…)", "1 citron (pour éviter que les fruits noircissent)", "Huile de friture (tournesol ou arachide)", "Sucre glace ou sucre en poudre pour servir"]}]}]}, "prep": [{"title": "Préparation", "subs": [{"title": "", "blocks": [{"t": "ol", "items": ["<strong>Séparer les œufs<\/strong> : mettez les blancs de côté dans un bol propre et sec.", "<strong>La pâte<\/strong> : dans un grand saladier, mélangez la farine, la levure, le sucre et le sel. Creusez un puits, ajoutez les jaunes d'œufs et l'huile, puis versez le lait (et la bière) <strong>petit à petit<\/strong> en fouettant pour éviter les grumeaux. Ajoutez l'arôme si vous en mettez un.", "<strong>Le repos<\/strong> : couvrez et laissez reposer <strong>1 heure<\/strong> à température ambiante.", "<strong>Les fruits<\/strong> : épluchez les pommes, retirez le trognon et coupez-les en rondelles d'environ 1 cm. Arrosez-les de jus de citron.", "<strong>Les blancs en neige<\/strong> : juste avant la cuisson, montez les blancs en neige ferme avec une pincée de sel et incorporez-les <strong>délicatement<\/strong> à la pâte.", "<strong>La friture<\/strong> : chauffez l'huile à <strong>170-180 °C<\/strong>. Trempez chaque rondelle de fruit dans la pâte, laissez égoutter l'excédent, puis plongez-la dans l'huile. Faites cuire 2 à 3 minutes en retournant à mi-cuisson, jusqu'à ce que le beignet soit bien doré.", "<strong>Égoutter<\/strong> : déposez les beignets sur du papier absorbant, puis saupoudrez-les de sucre."]}]}]}], "other": [{"title": "Astuces", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["<strong>La bière<\/strong> (ou de l'eau gazeuse) rend la pâte plus légère et croustillante ; l'alcool s'évapore à la cuisson.", "<strong>Sans thermomètre<\/strong>, plongez une goutte de pâte dans l'huile : si elle remonte aussitôt en grésillant, l'huile est prête.", "<strong>Ne mettez pas trop de beignets à la fois<\/strong>, sinon l'huile refroidit et les beignets deviennent gras.", "<strong>Sécurité<\/strong> : ne laissez jamais l'huile chaude sans surveillance, et n'y versez jamais d'eau en cas de flamme : couvrez la casserole avec un couvercle et coupez le feu.", "Sans fruits, cette pâte sert aussi pour des beignets salés (légumes, crevettes, fleurs de courgette) : supprimez alors le sucre et l'arôme."]}]}]}, {"title": "Idées de garnitures", "subs": [{"title": "", "blocks": [{"t": "p", "html": "Sucre glace, sucre à la cannelle, miel, caramel au beurre salé, coulis de fruits rouges ou une boule de glace vanille."}]}]}], "steps": [{"label": "", "title": "Séparer les œufs", "body": "Mettez les blancs de côté dans un bol propre et sec."}, {"label": "", "title": "La pâte", "body": "Dans un grand saladier, mélangez la farine, la levure, le sucre et le sel. Creusez un puits, ajoutez les jaunes d'œufs et l'huile, puis versez le lait (et la bière) <strong>petit à petit<\/strong> en fouettant pour éviter les grumeaux. Ajoutez l'arôme si vous en mettez un."}, {"label": "", "title": "Le repos", "body": "Couvrez et laissez reposer <strong>1 heure<\/strong> à température ambiante."}, {"label": "", "title": "Les fruits", "body": "Épluchez les pommes, retirez le trognon et coupez-les en rondelles d'environ 1 cm. Arrosez-les de jus de citron."}, {"label": "", "title": "Les blancs en neige", "body": "Juste avant la cuisson, montez les blancs en neige ferme avec une pincée de sel et incorporez-les <strong>délicatement<\/strong> à la pâte."}, {"label": "", "title": "La friture", "body": "Chauffez l'huile à <strong>170-180 °C<\/strong>. Trempez chaque rondelle de fruit dans la pâte, laissez égoutter l'excédent, puis plongez-la dans l'huile. Faites cuire 2 à 3 minutes en retournant à mi-cuisson, jusqu'à ce que le beignet soit bien doré."}, {"label": "", "title": "Égoutter", "body": "Déposez les beignets sur du papier absorbant, puis saupoudrez-les de sucre."}]}, {"slug": "crepes", "name": "Crêpes classiques", "nameHtml": "Crêpes classiques", "subtitle": "environ 30 crêpes", "emoji": "🫓", "ingredients": {"title": "Ingrédients", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["500 g de farine", "4 œufs", "1 litre de lait (entier de préférence)", "2 pincées de sel", "2 cuillères à soupe de sucre (facultatif, pour des crêpes sucrées)", "100 g de beurre fondu (ou 4 cuillères à soupe d'huile)", "Facultatif : 2 sachets de sucre vanillé, 2 cuillères à soupe de rhum ou de fleur d'oranger"]}]}]}, "prep": [{"title": "Préparation", "subs": [{"title": "", "blocks": [{"t": "ol", "items": ["<strong>Le mélange<\/strong> : versez la farine dans un grand saladier et creusez un puits au centre. Ajoutez-y les œufs, le sel et le sucre.", "<strong>Le lait<\/strong> : mélangez au fouet en versant le lait <strong>petit à petit<\/strong> pour éviter les grumeaux.", "<strong>Le beurre<\/strong> : incorporez le beurre fondu, puis l'arôme si vous en mettez un. La pâte doit être fluide, comme une crème liquide.", "<strong>Le repos<\/strong> : laissez reposer la pâte <strong>1 heure<\/strong> à température ambiante. Ce n'est pas obligatoire, mais les crêpes seront plus souples.", "<strong>La cuisson<\/strong> : chauffez une poêle bien chaude et graissez-la légèrement avec un papier absorbant imbibé d'huile ou de beurre. Versez une petite louche de pâte et inclinez la poêle pour l'étaler en couche fine.", "<strong>Retourner<\/strong> : quand les bords se décollent et dorent (environ 1 à 2 minutes), retournez la crêpe et laissez cuire 30 secondes à 1 minute de l'autre côté."]}]}]}], "other": [{"title": "Astuces", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["<strong>S'il y a des grumeaux<\/strong>, passez la pâte au mixeur plongeant quelques secondes.", "<strong>Si la pâte est trop épaisse<\/strong>, ajoutez un peu de lait ou d'eau.", "<strong>La première crêpe est souvent ratée<\/strong>, c'est normal : elle sert à bien graisser et chauffer la poêle.", "Pour les garder chaudes, empilez-les sur une assiette posée sur une casserole d'eau frémissante et couvrez-les.", "Avec cette quantité, utiliser <strong>deux poêles en même temps<\/strong> fait gagner beaucoup de temps."]}]}]}, {"title": "Idées de garnitures", "subs": [{"title": "", "blocks": [{"t": "p", "html": "Sucre et citron, Nutella, confiture, caramel au beurre salé, banane et chocolat, ou crème de marrons."}]}]}], "steps": [{"label": "", "title": "Le mélange", "body": "Versez la farine dans un grand saladier et creusez un puits au centre. Ajoutez-y les œufs, le sel et le sucre."}, {"label": "", "title": "Le lait", "body": "Mélangez au fouet en versant le lait <strong>petit à petit<\/strong> pour éviter les grumeaux."}, {"label": "", "title": "Le beurre", "body": "Incorporez le beurre fondu, puis l'arôme si vous en mettez un. La pâte doit être fluide, comme une crème liquide."}, {"label": "", "title": "Le repos", "body": "Laissez reposer la pâte <strong>1 heure<\/strong> à température ambiante. Ce n'est pas obligatoire, mais les crêpes seront plus souples."}, {"label": "", "title": "La cuisson", "body": "Chauffez une poêle bien chaude et graissez-la légèrement avec un papier absorbant imbibé d'huile ou de beurre. Versez une petite louche de pâte et inclinez la poêle pour l'étaler en couche fine."}, {"label": "", "title": "Retourner", "body": "Quand les bords se décollent et dorent (environ 1 à 2 minutes), retournez la crêpe et laissez cuire 30 secondes à 1 minute de l'autre côté."}]}, {"slug": "gaufres", "name": "Gaufres croustillantes", "nameHtml": "Gaufres croustillantes", "subtitle": "environ 24 gaufres", "emoji": "🧇", "ingredients": {"title": "Ingrédients", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["500 g de farine", "2 sachets de levure chimique (22 g)", "6 œufs", "1 litre de lait", "200 g de beurre fondu", "100 g de sucre", "2 sachets de sucre vanillé", "2 pincées de sel", "Facultatif : 2 cuillères à soupe de rhum ou de fleur d'oranger"]}]}]}, "prep": [{"title": "Préparation", "subs": [{"title": "", "blocks": [{"t": "ol", "items": ["<strong>Séparer les œufs<\/strong> : mettez les blancs de côté dans un bol propre et sec.", "<strong>Le mélange sec<\/strong> : dans un grand saladier, mélangez la farine, la levure, le sucre, le sucre vanillé et le sel.", "<strong>Les jaunes et le lait<\/strong> : creusez un puits, ajoutez les jaunes d'œufs, puis versez le lait <strong>petit à petit<\/strong> en fouettant pour éviter les grumeaux.", "<strong>Le beurre<\/strong> : incorporez le beurre fondu (tiédi), puis l'arôme si vous en mettez un.", "<strong>Les blancs en neige<\/strong> : montez les blancs en neige ferme avec une pincée de sel, puis incorporez-les <strong>délicatement<\/strong> à la pâte avec une spatule, en soulevant la pâte.", "<strong>Le repos<\/strong> : laissez reposer 30 minutes si vous avez le temps (facultatif).", "<strong>La cuisson<\/strong> : préchauffez le gaufrier et graissez-le légèrement. Versez une louche de pâte, refermez et laissez cuire 3 à 5 minutes, jusqu'à ce que la gaufre soit bien dorée."]}]}]}], "other": [{"title": "Astuces", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["<strong>Les blancs en neige<\/strong> rendent les gaufres légères et aérées : c'est l'étape qui fait la différence.", "<strong>Pour des gaufres plus croustillantes<\/strong>, remplacez 20 cl de lait par 20 cl d'eau gazeuse, ou ajoutez 100 g de fécule de maïs à la place de 100 g de farine.", "<strong>N'ouvrez pas le gaufrier trop tôt<\/strong>, sinon la gaufre se déchire. Attendez qu'il ne s'en échappe presque plus de vapeur.", "Posez les gaufres cuites sur une grille plutôt qu'empilées, pour qu'elles restent croustillantes."]}]}]}, {"title": "Idées de garnitures", "subs": [{"title": "", "blocks": [{"t": "p", "html": "Sucre glace, chantilly, Nutella, confiture, sirop d'érable, caramel au beurre salé, fruits frais ou une boule de glace."}]}]}], "steps": [{"label": "", "title": "Séparer les œufs", "body": "Mettez les blancs de côté dans un bol propre et sec."}, {"label": "", "title": "Le mélange sec", "body": "Dans un grand saladier, mélangez la farine, la levure, le sucre, le sucre vanillé et le sel."}, {"label": "", "title": "Les jaunes et le lait", "body": "Creusez un puits, ajoutez les jaunes d'œufs, puis versez le lait <strong>petit à petit<\/strong> en fouettant pour éviter les grumeaux."}, {"label": "", "title": "Le beurre", "body": "Incorporez le beurre fondu (tiédi), puis l'arôme si vous en mettez un."}, {"label": "", "title": "Les blancs en neige", "body": "Montez les blancs en neige ferme avec une pincée de sel, puis incorporez-les <strong>délicatement<\/strong> à la pâte avec une spatule, en soulevant la pâte."}, {"label": "", "title": "Le repos", "body": "Laissez reposer 30 minutes si vous avez le temps (facultatif)."}, {"label": "", "title": "La cuisson", "body": "Préchauffez le gaufrier et graissez-le légèrement. Versez une louche de pâte, refermez et laissez cuire 3 à 5 minutes, jusqu'à ce que la gaufre soit bien dorée."}]}, {"slug": "pain", "name": "Pain maison", "nameHtml": "Pain maison", "subtitle": "2 gros pains ou 4 baguettes", "emoji": "🥖", "ingredients": {"title": "Ingrédients", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["1 kg de farine (type T65, dite « farine à pain »)", "65 cl d'eau tiède", "2 sachets de levure de boulanger sèche (14 g) ou 40 g de levure fraîche", "20 g de sel"]}]}]}, "prep": [{"title": "Préparation", "subs": [{"title": "", "blocks": [{"t": "ol", "items": ["<strong>Activer la levure<\/strong> : délayez la levure dans un peu d'eau tiède (prélevée sur les 65 cl). Laissez reposer 10 minutes, jusqu'à ce qu'une mousse se forme.", "<strong>Le mélange<\/strong> : dans un grand saladier, mélangez la farine et le sel. Creusez un puits, versez-y la levure et le reste de l'eau, puis mélangez jusqu'à obtenir une pâte homogène.", "<strong>Le pétrissage<\/strong> : pétrissez la pâte sur un plan de travail légèrement fariné pendant <strong>10 à 15 minutes<\/strong>, jusqu'à ce qu'elle soit lisse, élastique et qu'elle se détache des doigts.", "<strong>Première pousse<\/strong> : formez une boule, placez-la dans un saladier légèrement huilé, couvrez d'un torchon et laissez lever <strong>1 h 30 à 2 heures<\/strong> dans un endroit tiède. La pâte doit doubler de volume.", "<strong>Le façonnage<\/strong> : dégazez la pâte en appuyant dessus, divisez-la en 2 (ou en 4 pour des baguettes), puis façonnez des boules, des pains allongés ou des baguettes. Déposez-les sur une plaque recouverte de papier cuisson et farinée.", "<strong>Deuxième pousse<\/strong> : couvrez d'un torchon et laissez lever encore <strong>45 minutes à 1 heure<\/strong>.", "<strong>Préchauffer le four<\/strong> : préchauffez le four à <strong>240 °C<\/strong> en plaçant un récipient vide (lèchefrite ou plat en métal) sur la sole ou en bas du four.", "<strong>Grigner<\/strong> : juste avant d'enfourner, saupoudrez les pains d'un peu de farine et faites quelques entailles nettes et peu profondes sur le dessus avec une lame ou un couteau bien aiguisé.", "<strong>La cuisson<\/strong> : enfournez, puis versez aussitôt un verre d'eau dans le récipient chaud pour créer de la vapeur et refermez vite la porte. Faites cuire <strong>30 à 35 minutes<\/strong> pour les gros pains, <strong>20 à 25 minutes<\/strong> pour les baguettes, jusqu'à ce que la croûte soit bien dorée.", "<strong>Refroidir<\/strong> : laissez refroidir les pains sur une grille au moins 30 minutes avant de les couper."]}]}]}], "other": [{"title": "Astuces", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["<strong>Le pain est cuit<\/strong> quand il sonne creux lorsqu'on tapote sous sa base.", "<strong>La vapeur<\/strong> au début de la cuisson permet au pain de bien gonfler et donne une croûte croustillante et brillante.", "<strong>L'eau doit être tiède, pas chaude<\/strong> : au-dessus de 40 °C, la levure meurt et la pâte ne lève pas.", "<strong>Ne mettez pas le sel en contact direct avec la levure<\/strong>, il ralentit son action : mélangez-le d'abord à la farine.", "<strong>Pour un pain plus savoureux, à la mie plus alvéolée<\/strong>, faites la première pousse au réfrigérateur pendant 12 à 24 heures, puis laissez la pâte revenir 1 heure à température ambiante avant de la façonner.", "<strong>Le pain se congèle très bien<\/strong> : emballez-le une fois complètement refroidi et réchauffez-le 10 minutes au four à 180 °C."]}]}]}, {"title": "Variantes", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["<strong>Pain complet<\/strong> : remplacez la moitié de la farine T65 par de la farine complète (T150) et ajoutez 5 cl d'eau.", "<strong>Pain aux céréales<\/strong> : ajoutez 150 g de graines (tournesol, lin, sésame, courge) au moment du mélange.", "<strong>Pain aux noix<\/strong> : ajoutez 200 g de cerneaux de noix concassés à la fin du pétrissage.", "<strong>Pain aux olives<\/strong> : ajoutez 200 g d'olives dénoyautées et coupées en morceaux à la fin du pétrissage."]}]}]}], "steps": [{"label": "", "title": "Activer la levure", "body": "Délayez la levure dans un peu d'eau tiède (prélevée sur les 65 cl). Laissez reposer 10 minutes, jusqu'à ce qu'une mousse se forme."}, {"label": "", "title": "Le mélange", "body": "Dans un grand saladier, mélangez la farine et le sel. Creusez un puits, versez-y la levure et le reste de l'eau, puis mélangez jusqu'à obtenir une pâte homogène."}, {"label": "", "title": "Le pétrissage", "body": "Pétrissez la pâte sur un plan de travail légèrement fariné pendant <strong>10 à 15 minutes<\/strong>, jusqu'à ce qu'elle soit lisse, élastique et qu'elle se détache des doigts."}, {"label": "", "title": "Première pousse", "body": "Formez une boule, placez-la dans un saladier légèrement huilé, couvrez d'un torchon et laissez lever <strong>1 h 30 à 2 heures<\/strong> dans un endroit tiède. La pâte doit doubler de volume."}, {"label": "", "title": "Le façonnage", "body": "Dégazez la pâte en appuyant dessus, divisez-la en 2 (ou en 4 pour des baguettes), puis façonnez des boules, des pains allongés ou des baguettes. Déposez-les sur une plaque recouverte de papier cuisson et farinée."}, {"label": "", "title": "Deuxième pousse", "body": "Couvrez d'un torchon et laissez lever encore <strong>45 minutes à 1 heure<\/strong>."}, {"label": "", "title": "Préchauffer le four", "body": "Préchauffez le four à <strong>240 °C<\/strong> en plaçant un récipient vide (lèchefrite ou plat en métal) sur la sole ou en bas du four."}, {"label": "", "title": "Grigner", "body": "Juste avant d'enfourner, saupoudrez les pains d'un peu de farine et faites quelques entailles nettes et peu profondes sur le dessus avec une lame ou un couteau bien aiguisé."}, {"label": "", "title": "La cuisson", "body": "Enfournez, puis versez aussitôt un verre d'eau dans le récipient chaud pour créer de la vapeur et refermez vite la porte. Faites cuire <strong>30 à 35 minutes<\/strong> pour les gros pains, <strong>20 à 25 minutes<\/strong> pour les baguettes, jusqu'à ce que la croûte soit bien dorée."}, {"label": "", "title": "Refroidir", "body": "Laissez refroidir les pains sur une grille au moins 30 minutes avant de les couper."}]}, {"slug": "pancakes", "name": "Pancakes moelleux", "nameHtml": "Pancakes moelleux", "subtitle": "environ 24 pancakes", "emoji": "🥞", "ingredients": {"title": "Ingrédients", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["500 g de farine", "2 sachets de levure chimique (22 g)", "4 œufs", "60 cl de lait", "100 g de beurre fondu", "80 g de sucre", "2 sachets de sucre vanillé", "2 pincées de sel"]}]}]}, "prep": [{"title": "Préparation", "subs": [{"title": "", "blocks": [{"t": "ol", "items": ["<strong>Le mélange sec<\/strong> : dans un grand saladier, mélangez la farine, la levure, le sucre, le sucre vanillé et le sel.", "<strong>Le mélange liquide<\/strong> : dans un autre bol, battez les œufs avec le lait, puis ajoutez le beurre fondu (tiédi).", "<strong>Assembler<\/strong> : versez le mélange liquide sur le mélange sec et mélangez <strong>juste assez<\/strong> pour qu'il n'y ait plus de farine visible. Quelques petits grumeaux ne sont pas un problème. La pâte doit être épaisse et napper la cuillère.", "<strong>Le repos<\/strong> : laissez reposer 10 à 15 minutes, le temps que la levure commence à agir.", "<strong>La cuisson<\/strong> : chauffez une poêle à <strong>feu moyen<\/strong> et graissez-la légèrement. Versez une petite louche de pâte sans l'étaler : le pancake doit faire environ 10 cm de diamètre et 1 cm d'épaisseur.", "<strong>Retourner<\/strong> : quand des bulles apparaissent à la surface et que les bords semblent secs (environ 2 minutes), retournez le pancake et laissez cuire 1 à 2 minutes de l'autre côté."]}]}]}], "other": [{"title": "Astuces", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["<strong>Ne mélangez pas trop la pâte<\/strong> : en la travaillant trop, les pancakes deviennent plats et caoutchouteux.", "<strong>Le feu ne doit pas être trop fort<\/strong>, sinon l'extérieur brûle avant que l'intérieur soit cuit.", "<strong>Pour des pancakes encore plus moelleux<\/strong>, séparez les œufs et incorporez les blancs montés en neige à la fin, ou remplacez le lait par du lait ribot (babeurre).", "Pour les garder chauds, placez-les dans le four à 80 °C, recouverts d'un torchon."]}]}]}, {"title": "Idées de garnitures", "subs": [{"title": "", "blocks": [{"t": "p", "html": "Sirop d'érable, miel, beurre, fruits rouges, banane, pépites de chocolat, Nutella, ou bacon grillé pour une version sucrée-salée."}]}]}], "steps": [{"label": "", "title": "Le mélange sec", "body": "Dans un grand saladier, mélangez la farine, la levure, le sucre, le sucre vanillé et le sel."}, {"label": "", "title": "Le mélange liquide", "body": "Dans un autre bol, battez les œufs avec le lait, puis ajoutez le beurre fondu (tiédi)."}, {"label": "", "title": "Assembler", "body": "Versez le mélange liquide sur le mélange sec et mélangez <strong>juste assez<\/strong> pour qu'il n'y ait plus de farine visible. Quelques petits grumeaux ne sont pas un problème. La pâte doit être épaisse et napper la cuillère."}, {"label": "", "title": "Le repos", "body": "Laissez reposer 10 à 15 minutes, le temps que la levure commence à agir."}, {"label": "", "title": "La cuisson", "body": "Chauffez une poêle à <strong>feu moyen<\/strong> et graissez-la légèrement. Versez une petite louche de pâte sans l'étaler : le pancake doit faire environ 10 cm de diamètre et 1 cm d'épaisseur."}, {"label": "", "title": "Retourner", "body": "Quand des bulles apparaissent à la surface et que les bords semblent secs (environ 2 minutes), retournez le pancake et laissez cuire 1 à 2 minutes de l'autre côté."}]}, {"slug": "pizza", "name": "Pâte à pizza", "nameHtml": "Pâte à pizza", "subtitle": "4 pizzas de 30 cm environ", "emoji": "🍕", "ingredients": {"title": "Ingrédients", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["1 kg de farine (type T45 ou T55, ou farine italienne « 00 »)", "60 cl d'eau tiède", "2 sachets de levure de boulanger sèche (14 g) ou 40 g de levure fraîche", "4 cuillères à soupe d'huile d'olive", "20 g de sel", "2 cuillères à café de sucre"]}]}]}, "prep": [{"title": "Préparation", "subs": [{"title": "", "blocks": [{"t": "ol", "items": ["<strong>Activer la levure<\/strong> : délayez la levure et le sucre dans un peu d'eau tiède (prélevée sur les 60 cl). Laissez reposer 10 minutes, jusqu'à ce qu'une mousse se forme.", "<strong>Le mélange<\/strong> : dans un grand saladier, mélangez la farine et le sel. Creusez un puits, versez-y la levure, l'huile d'olive et le reste de l'eau.", "<strong>Le pétrissage<\/strong> : mélangez, puis pétrissez la pâte sur un plan de travail fariné pendant <strong>10 minutes<\/strong>, jusqu'à ce qu'elle soit lisse, souple et ne colle plus aux doigts.", "<strong>La pousse<\/strong> : formez une boule, placez-la dans un saladier légèrement huilé, couvrez d'un torchon et laissez lever <strong>1 h 30 à 2 heures<\/strong> dans un endroit tiède. La pâte doit doubler de volume.", "<strong>Le façonnage<\/strong> : dégazez la pâte en appuyant dessus, puis divisez-la en 4 pâtons. Étalez chaque pâton à la main (ou au rouleau) en disque d'environ 30 cm.", "<strong>La garniture<\/strong> : déposez la pâte sur une plaque farinée ou du papier cuisson, puis garnissez-la.", "<strong>La cuisson<\/strong> : enfournez dans un four préchauffé à <strong>250 °C<\/strong> (ou le plus chaud possible) pendant 10 à 15 minutes, jusqu'à ce que les bords soient dorés et le fromage fondu."]}]}]}], "other": [{"title": "Astuces", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["<strong>L'eau doit être tiède, pas chaude<\/strong> : au-dessus de 40 °C, la levure meurt et la pâte ne lève pas.", "<strong>Ne mettez pas le sel en contact direct avec la levure<\/strong>, il ralentit son action : c'est pour ça qu'on le mélange d'abord à la farine.", "<strong>Pour une pâte plus savoureuse et plus digeste<\/strong>, laissez-la lever 24 à 48 heures au réfrigérateur, puis sortez-la 1 heure avant de l'étaler.", "<strong>Pour une base bien croustillante<\/strong>, préchauffez la plaque (ou une pierre à pizza) dans le four et faites glisser la pizza dessus.", "<strong>La pâte se congèle très bien<\/strong> : après la pousse, emballez les pâtons séparément dans du film alimentaire. Décongelez-les au réfrigérateur la veille."]}]}]}, {"title": "Idées de garnitures", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["<strong>Margherita<\/strong> : sauce tomate, mozzarella, basilic frais, huile d'olive.", "<strong>Reine<\/strong> : sauce tomate, mozzarella, jambon, champignons.", "<strong>Quatre fromages<\/strong> : mozzarella, gorgonzola, chèvre, parmesan.", "<strong>Végétarienne<\/strong> : sauce tomate, mozzarella, poivrons, oignons, courgettes, olives.", "<strong>Blanche<\/strong> : crème fraîche, mozzarella, lardons, oignons."]}]}]}], "steps": [{"label": "", "title": "Activer la levure", "body": "Délayez la levure et le sucre dans un peu d'eau tiède (prélevée sur les 60 cl). Laissez reposer 10 minutes, jusqu'à ce qu'une mousse se forme."}, {"label": "", "title": "Le mélange", "body": "Dans un grand saladier, mélangez la farine et le sel. Creusez un puits, versez-y la levure, l'huile d'olive et le reste de l'eau."}, {"label": "", "title": "Le pétrissage", "body": "Mélangez, puis pétrissez la pâte sur un plan de travail fariné pendant <strong>10 minutes<\/strong>, jusqu'à ce qu'elle soit lisse, souple et ne colle plus aux doigts."}, {"label": "", "title": "La pousse", "body": "Formez une boule, placez-la dans un saladier légèrement huilé, couvrez d'un torchon et laissez lever <strong>1 h 30 à 2 heures<\/strong> dans un endroit tiède. La pâte doit doubler de volume."}, {"label": "", "title": "Le façonnage", "body": "Dégazez la pâte en appuyant dessus, puis divisez-la en 4 pâtons. Étalez chaque pâton à la main (ou au rouleau) en disque d'environ 30 cm."}, {"label": "", "title": "La garniture", "body": "Déposez la pâte sur une plaque farinée ou du papier cuisson, puis garnissez-la."}, {"label": "", "title": "La cuisson", "body": "Enfournez dans un four préchauffé à <strong>250 °C<\/strong> (ou le plus chaud possible) pendant 10 à 15 minutes, jusqu'à ce que les bords soient dorés et le fromage fondu."}]}, {"slug": "pate-brisee", "name": "Pâte brisée", "nameHtml": "Pâte brisée", "subtitle": "2 fonds de tarte de 28 cm", "emoji": "🥧", "ingredients": {"title": "Ingrédients", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["500 g de farine (type T45 ou T55)", "250 g de beurre doux bien froid, coupé en dés", "10 à 12 cl d'eau très froide", "2 pincées de sel", "Facultatif : 2 jaunes d'œufs (pour une pâte plus riche et plus facile à travailler ; réduisez alors l'eau à 6 à 8 cl)", "Facultatif, pour une tarte sucrée : 2 cuillères à soupe de sucre"]}]}]}, "prep": [{"title": "Préparation", "subs": [{"title": "", "blocks": [{"t": "ol", "items": ["<strong>Sabler<\/strong> : dans un grand saladier, mélangez la farine et le sel (et le sucre si vous en mettez). Ajoutez les dés de beurre froid et frottez le mélange entre vos doigts jusqu'à obtenir une texture de <strong>sable grossier<\/strong>, sans morceaux de beurre visibles.", "<strong>Ajouter l'eau<\/strong> : creusez un puits, ajoutez les jaunes d'œufs si vous en mettez, puis versez l'eau froide <strong>petit à petit<\/strong> en mélangeant du bout des doigts ou avec une fourchette. Arrêtez dès que la pâte se rassemble en boule : elle ne doit pas être collante.", "<strong>Fraser<\/strong> : sur le plan de travail, écrasez rapidement la pâte avec la paume de la main en la poussant devant vous, une ou deux fois seulement, pour l'homogénéiser. Ne la pétrissez pas.", "<strong>Le repos<\/strong> : divisez la pâte en 2 boules, aplatissez-les en disques, emballez-les dans du film alimentaire et laissez-les reposer <strong>au moins 30 minutes<\/strong> au réfrigérateur.", "<strong>Étaler<\/strong> : sur un plan de travail fariné, étalez chaque disque au rouleau sur environ 3 mm d'épaisseur. Enroulez la pâte autour du rouleau pour la déposer dans le moule beurré, puis faites-la adhérer aux bords et coupez l'excédent.", "<strong>Piquer<\/strong> : piquez le fond de tarte avec une fourchette pour éviter qu'il gonfle, puis remettez-le 15 minutes au réfrigérateur.", "<strong>La cuisson<\/strong> : selon la recette, garnissez la tarte directement, ou faites cuire le fond <strong>à blanc<\/strong> (voir ci-dessous)."]}]}, {"title": "Cuisson à blanc", "blocks": [{"t": "p", "html": "Pour une garniture qui ne cuit pas (tarte aux fraises, au citron) ou très liquide (quiche), faites précuire le fond :"}, {"t": "ol", "items": ["Préchauffez le four à <strong>180 °C<\/strong>.", "Recouvrez la pâte de papier cuisson et remplissez-la de billes de cuisson ou de légumes secs (haricots, pois chiches).", "Faites cuire <strong>15 minutes<\/strong>, retirez le papier et les billes, puis prolongez la cuisson de <strong>5 à 10 minutes<\/strong> jusqu'à ce que le fond soit doré."]}]}]}], "other": [{"title": "Astuces", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["<strong>Tout doit rester froid<\/strong> (beurre, eau, mains) : si le beurre fond pendant la préparation, la pâte devient dure et perd son côté friable.", "<strong>Travaillez la pâte le moins possible<\/strong> : plus on la pétrit, plus elle devient élastique et se rétracte à la cuisson.", "<strong>Le repos au froid est indispensable<\/strong> : il détend la pâte et l'empêche de rétrécir dans le moule.", "<strong>Pour éviter un fond détrempé<\/strong> avec une quiche, badigeonnez le fond précuit d'un peu de blanc d'œuf et remettez-le 2 minutes au four avant de garnir.", "<strong>La pâte se conserve<\/strong> 2 jours au réfrigérateur ou 3 mois au congélateur, bien emballée. Décongelez-la au réfrigérateur la veille."]}]}]}, {"title": "Idées de tartes", "subs": [{"title": "", "blocks": [{"t": "ul", "items": ["<strong>Salées<\/strong> : quiche lorraine, tarte aux poireaux, tarte à la tomate et à la moutarde, tarte au thon.", "<strong>Sucrées<\/strong> : tarte aux pommes, tarte aux prunes, tarte au citron, tarte aux fraises, tarte bourdaloue (poires et amandes)."]}]}]}], "steps": [{"label": "", "title": "Sabler", "body": "Dans un grand saladier, mélangez la farine et le sel (et le sucre si vous en mettez). Ajoutez les dés de beurre froid et frottez le mélange entre vos doigts jusqu'à obtenir une texture de <strong>sable grossier<\/strong>, sans morceaux de beurre visibles."}, {"label": "", "title": "Ajouter l'eau", "body": "Creusez un puits, ajoutez les jaunes d'œufs si vous en mettez, puis versez l'eau froide <strong>petit à petit<\/strong> en mélangeant du bout des doigts ou avec une fourchette. Arrêtez dès que la pâte se rassemble en boule : elle ne doit pas être collante."}, {"label": "", "title": "Fraser", "body": "Sur le plan de travail, écrasez rapidement la pâte avec la paume de la main en la poussant devant vous, une ou deux fois seulement, pour l'homogénéiser. Ne la pétrissez pas."}, {"label": "", "title": "Le repos", "body": "Divisez la pâte en 2 boules, aplatissez-les en disques, emballez-les dans du film alimentaire et laissez-les reposer <strong>au moins 30 minutes<\/strong> au réfrigérateur."}, {"label": "", "title": "Étaler", "body": "Sur un plan de travail fariné, étalez chaque disque au rouleau sur environ 3 mm d'épaisseur. Enroulez la pâte autour du rouleau pour la déposer dans le moule beurré, puis faites-la adhérer aux bords et coupez l'excédent."}, {"label": "", "title": "Piquer", "body": "Piquez le fond de tarte avec une fourchette pour éviter qu'il gonfle, puis remettez-le 15 minutes au réfrigérateur."}, {"label": "", "title": "La cuisson", "body": "Selon la recette, garnissez la tarte directement, ou faites cuire le fond <strong>à blanc<\/strong> (voir ci-dessous)."}, {"label": "Cuisson à blanc", "title": "", "body": "Préchauffez le four à <strong>180 °C<\/strong>."}, {"label": "Cuisson à blanc", "title": "", "body": "Recouvrez la pâte de papier cuisson et remplissez-la de billes de cuisson ou de légumes secs (haricots, pois chiches)."}, {"label": "Cuisson à blanc", "title": "", "body": "Faites cuire <strong>15 minutes<\/strong>, retirez le papier et les billes, puis prolongez la cuisson de <strong>5 à 10 minutes<\/strong> jusqu'à ce que le fond soit doré."}]}];
+  var BY_SLUG = {};
+  RECIPES.forEach(function (r) { BY_SLUG[r.slug] = r; });
+  var app = document.getElementById("app");
+  var view = { name: "home" };
+  var lastSlug = null;
+  var lastStep = 0;
+
+  // ---------- Routage (hash) ----------
+  function parseRoute() {
+    var m = /^#\/r\/([^\/]+)(?:\/etape\/(\d+))?$/.exec(location.hash);
+    if (!m || !BY_SLUG[m[1]]) return { name: "home" };
+    var r = BY_SLUG[m[1]];
+    if (m[2] && r.steps.length) {
+      var n = Math.min(Math.max(parseInt(m[2], 10), 1), r.steps.length);
+      return { name: "step", recipe: r, n: n };
+    }
+    return { name: "recipe", recipe: r };
+  }
+  function parentHash(v) {
+    if (v.name === "step") return "#/r/" + v.recipe.slug;
+    return "#/";
+  }
+  function go(hash) {
+    history.pushState({ app: 1 }, "", hash);
+    render();
+  }
+  function replace(hash) {
+    history.replaceState(history.state, "", hash);
+    render();
+  }
+  function goBack() {
+    if (view.name === "home") return;
+    if (history.state && history.state.app) history.back();
+    else replace(parentHash(view));
+  }
+  window.addEventListener("popstate", render);
+
+  // ---------- Rendu ----------
+  function blocksHtml(blocks, olClass) {
+    return blocks.map(function (b) {
+      if (b.t === "p") return "<p>" + b.html + "</p>";
+      var tag = b.t === "ol" ? "ol" : "ul";
+      var cls = b.t === "ol" ? ' class="' + olClass + '"' : "";
+      return "<" + tag + cls + ">" + b.items.map(function (i) { return "<li>" + i + "</li>"; }).join("") + "</" + tag + ">";
+    }).join("");
+  }
+  function sectionHtml(sec, extraClass) {
+    return '<section class="panel ' + (extraClass || "") + '">' +
+      (sec.title ? "<h2>" + sec.title + "</h2>" : "") +
+      sec.subs.map(function (s) {
+        return (s.title ? "<h3>" + s.title + "</h3>" : "") + blocksHtml(s.blocks, "steps");
+      }).join("") + "</section>";
+  }
+
+  function renderHome() {
+    document.title = "Mes recettes";
+    app.innerHTML =
+      '<header class="top"><div class="ttl"><h1>Mes recettes</h1>' +
+      '<p class="sub">' + RECIPES.length + " recettes</p></div>" +
+      '<p class="hint">◀ ▲ ▼ ▶ pour choisir · OK pour ouvrir</p></header>' +
+      '<main class="scroll"><div class="grid">' +
+      RECIPES.map(function (r) {
+        return '<a class="card nav" href="#/r/' + r.slug + '" data-go="#/r/' + r.slug + '" data-slug="' + r.slug + '">' +
+          '<span class="emoji">' + r.emoji + "</span>" +
+          '<span class="ctitle">' + r.nameHtml + "</span>" +
+          (r.subtitle ? '<span class="csub">' + r.subtitle + "</span>" : "") + "</a>";
+      }).join("") + "</div></main>";
+    var target = lastSlug && app.querySelector('[data-slug="' + lastSlug + '"]');
+    focusEl(target || app.querySelector(".card"));
+  }
+
+  function renderRecipe(r) {
+    document.title = r.name;
+    var hasSteps = r.steps.length > 0;
+    app.innerHTML =
+      '<header class="top">' +
+      '<button class="btn nav" data-back>← Recettes</button>' +
+      '<div class="ttl"><h1>' + r.emoji + " " + r.nameHtml + "</h1>" +
+      (r.subtitle ? '<p class="sub">' + r.subtitle + "</p>" : "") + "</div>" +
+      (hasSteps ? '<button class="btn primary nav" id="start" data-go="#/r/' + r.slug + '/etape/1">▶ Pas à pas</button>' : "") +
+      "</header>" +
+      '<main class="scroll recipe">' +
+      (r.ingredients ? sectionHtml(r.ingredients) : "<div></div>") +
+      "<div>" + r.prep.map(function (s) { return sectionHtml(s); }).join("") + "</div>" +
+      (r.other.length ? '<div class="extras">' + r.other.map(function (s) { return sectionHtml(s); }).join("") + "</div>" : "") +
+      "</main>";
+    focusEl(document.getElementById("start") || app.querySelector(".nav"));
+  }
+
+  function sizeClass(htmlText) {
+    var len = htmlText.replace(/<[^>]*>/g, "").length;
+    return len > 320 ? " xlong" : len > 200 ? " long" : "";
+  }
+
+  function renderStep(r, n) {
+    var s = r.steps[n - 1];
+    var total = r.steps.length;
+    var dir = n < lastStep ? " rev" : "";
+    lastStep = n;
+    document.title = r.name + " – étape " + n;
+    var side = app.querySelector(".side");
+    var sideScroll = side ? side.scrollTop : 0;
+    app.innerHTML =
+      '<header class="top">' +
+      '<button class="btn" tabindex="-1" data-back>✕ Quitter</button>' +
+      '<div class="ttl"><h1>' + r.emoji + " " + r.nameHtml + "</h1></div>" +
+      "</header>" +
+      '<div class="progress"><div style="width:' + (n / total * 100) + '%"></div></div>' +
+      '<main class="stepmain">' +
+      '<section class="step"><div class="stepinner fade' + dir + '">' +
+      '<div class="count">Étape ' + n + " / " + total + "</div>" +
+      (s.label ? '<p class="label">' + s.label + "</p>" : "") +
+      (s.title ? '<h2 class="stitle">' + s.title + "</h2>" : "") +
+      '<p class="sbody' + sizeClass(s.body) + '">' + s.body + "</p></div></section>" +
+      (r.ingredients ? sectionHtml(r.ingredients, "side") : "") +
+      "</main>" +
+      '<footer class="stepfoot">' +
+      '<button class="btn" tabindex="-1" data-step="-1"' + (n === 1 ? " disabled style=\"visibility:hidden\"" : "") + ">◀ Précédente</button>" +
+      '<span class="hint">◀ ▶ changer d\'étape · ▲ ▼ ingrédients · Retour pour quitter</span>' +
+      '<button class="btn primary" tabindex="-1" data-step="1">' + (n === total ? "Terminé ✓" : "Suivante ▶") + "</button>" +
+      "</footer>";
+    var newSide = app.querySelector(".side");
+    if (newSide) newSide.scrollTop = sideScroll;
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  }
+
+  function render() {
+    var prev = view;
+    view = parseRoute();
+    if (view.name !== "step") lastStep = 0;
+    if (view.name === "home") renderHome();
+    else if (view.name === "recipe") { lastSlug = view.recipe.slug; renderRecipe(view.recipe); }
+    else {
+      if (prev.name !== "step" || prev.recipe !== view.recipe) lastStep = 0;
+      lastSlug = view.recipe.slug;
+      renderStep(view.recipe, view.n);
+    }
+    keepAwake(view.name === "step");
+  }
+
+  function changeStep(delta) {
+    var n = view.n + delta;
+    if (n < 1) return;
+    if (n > view.recipe.steps.length) { goBack(); return; }
+    replace("#/r/" + view.recipe.slug + "/etape/" + n);
+  }
+
+  // ---------- Navigation à la télécommande ----------
+  function focusEl(el) {
+    if (!el) return;
+    el.focus({ preventScroll: true });
+    if (el.scrollIntoView) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
+  function moveFocus(dir) {
+    var els = Array.prototype.slice.call(app.querySelectorAll(".nav"));
+    var cur = document.activeElement;
+    if (els.indexOf(cur) < 0) { focusEl(els[0]); return !!els[0]; }
+    var a = cur.getBoundingClientRect();
+    var ax = a.left + a.width / 2, ay = a.top + a.height / 2;
+    var best = null, bestScore = Infinity;
+    els.forEach(function (el) {
+      if (el === cur) return;
+      var b = el.getBoundingClientRect();
+      var dx = b.left + b.width / 2 - ax, dy = b.top + b.height / 2 - ay;
+      var main, cross;
+      if (dir === "left") { main = -dx; cross = dy; }
+      else if (dir === "right") { main = dx; cross = dy; }
+      else if (dir === "up") { main = -dy; cross = dx; }
+      else { main = dy; cross = dx; }
+      if (main <= 1) return;
+      var score = main + Math.abs(cross) * 2;
+      if (score < bestScore) { bestScore = score; best = el; }
+    });
+    if (best) focusEl(best);
+    return !!best;
+  }
+
+  function scrollArea(selector, dir) {
+    var el = app.querySelector(selector);
+    if (el) el.scrollBy({ top: dir * el.clientHeight * 0.45, behavior: "smooth" });
+  }
+
+  var BACK_KEYS = { Escape: 1, Backspace: 1, GoBack: 1, BrowserBack: 1 };
+  var BACK_CODES = { 4: 1, 27: 1, 461: 1, 10009: 1 };
+  var DIRS = { ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down", Left: "left", Right: "right", Up: "up", Down: "down" };
+
+  document.addEventListener("keydown", function (e) {
+    if (BACK_KEYS[e.key] || BACK_CODES[e.keyCode]) {
+      if (view.name !== "home") { e.preventDefault(); goBack(); }
+      return;
+    }
+    var dir = DIRS[e.key];
+    var enter = e.key === "Enter" || e.key === " " || e.keyCode === 13;
+    if (view.name === "step") {
+      if (dir === "right" || enter) { e.preventDefault(); changeStep(1); }
+      else if (dir === "left") { e.preventDefault(); changeStep(-1); }
+      else if (dir === "up" || dir === "down") { e.preventDefault(); scrollArea(".side", dir === "up" ? -1 : 1); }
+      return;
+    }
+    if (dir) {
+      e.preventDefault();
+      if (!moveFocus(dir) && (dir === "up" || dir === "down")) scrollArea(".scroll", dir === "up" ? -1 : 1);
+    }
+  });
+
+  app.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-go],[data-back],[data-step]");
+    if (!t) return;
+    e.preventDefault();
+    if (t.hasAttribute("data-back")) goBack();
+    else if (t.hasAttribute("data-step")) changeStep(parseInt(t.getAttribute("data-step"), 10));
+    else go(t.getAttribute("data-go"));
+  });
+
+  // ---------- Garder l'écran allumé en mode pas à pas (si le navigateur le permet) ----------
+  var wakeLock = null;
+  function keepAwake(on) {
+    if (!("wakeLock" in navigator)) return;
+    if (on && !wakeLock) {
+      navigator.wakeLock.request("screen").then(function (l) {
+        wakeLock = l;
+        l.addEventListener("release", function () { wakeLock = null; });
+      }).catch(function () {});
+    } else if (!on && wakeLock) {
+      wakeLock.release().catch(function () {});
+      wakeLock = null;
+    }
+  }
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") keepAwake(view.name === "step");
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
