@@ -116,10 +116,10 @@
   .stepinner { margin: auto 0; }
   .step .count { color: var(--accent); font-size: 1.3rem; font-weight: 700; letter-spacing: .03em; }
   .step .label { color: var(--muted); font-size: 1.2rem; margin: .3rem 0 0; }
-  .step .stitle { font-size: 3.4rem; margin: 1rem 0 1.4rem; }
-  .step .sbody { font-size: 2.1rem; line-height: 1.4; margin: 0; }
-  .step .sbody.long { font-size: 1.65rem; }
-  .step .sbody.xlong { font-size: 1.4rem; }
+  .step .stitle { font-size: 3rem; margin: .8rem 0 1.2rem; }
+  .step .sbody { font-size: 1.85rem; line-height: 1.4; margin: 0; }
+  .step .sbody.long { font-size: 1.5rem; }
+  .step .sbody.xlong { font-size: 1.25rem; }
   .side { overflow-y: auto; margin: 0; }
   .side ul { font-size: 1.05rem; }
   .stepfoot {
@@ -205,6 +205,7 @@
     else replace(parentHash(view));
   }
   window.addEventListener("popstate", render);
+  window.addEventListener("resize", function () { if (view.name === "step") fitStep(); });
 
   // ---------- Rendu ----------
   function blocksHtml(blocks, olClass) {
@@ -285,6 +286,23 @@
     return len > 320 ? " xlong" : len > 200 ? " long" : "";
   }
 
+  // Sur grand écran (TV), rapetisse le texte de l'étape tant qu'il dépasse :
+  // la télécommande ne permet pas de faire défiler la zone de l'étape
+  function fitStep() {
+    var step = app.querySelector(".step");
+    var body = app.querySelector(".step .sbody");
+    var title = app.querySelector(".step .stitle");
+    if (!step || !body || window.innerWidth <= 700) return;
+    body.style.fontSize = "";
+    if (title) title.style.fontSize = "";
+    var base = parseFloat(getComputedStyle(body).fontSize);
+    var tbase = title ? parseFloat(getComputedStyle(title).fontSize) : 0;
+    for (var k = 0.95; step.scrollHeight > step.clientHeight + 1 && k >= 0.6; k -= 0.05) {
+      body.style.fontSize = (base * k) + "px";
+      if (title) title.style.fontSize = (tbase * Math.max(k, 0.8)) + "px";
+    }
+  }
+
   function renderStep(r, n) {
     var s = r.steps[n - 1];
     var total = r.steps.length;
@@ -314,6 +332,7 @@
       "</footer>";
     var newSide = app.querySelector(".side");
     if (newSide) newSide.scrollTop = sideScroll;
+    fitStep();
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   }
 
