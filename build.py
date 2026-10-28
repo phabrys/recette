@@ -19,7 +19,7 @@ IGNORED = {"readme.md"}
 #   emoji: 🍪
 #   ---
 # Ordre d'affichage des catégories sur l'accueil ; les autres suivent par ordre alphabétique.
-CATEGORIES = ["Entrées et apéritifs", "Plats", "Desserts", "Pâtisseries", "Pains et viennoiseries", "Boissons", "Bases"]
+CATEGORIES = ["Entrées et apéritifs", "Plats", "Accompagnements", "Desserts", "Pâtisseries", "Pains et viennoiseries", "Boissons", "Bases"]
 DEFAULT_CATEGORY = "Divers"
 DEFAULT_EMOJI = "🍽️"
 
