@@ -55,4 +55,4 @@ emoji: 🍔
 
 ## Idées de garniture
 
-Steak haché, cheddar, salade, tomate, oignon rouge, cornichons, avec du ketchup, de la mayonnaise ou de la sauce barbecue ; ou en version créole, avec du poulet pané ou des nuggets, des crudités et de la sauce chien.
+Steak haché maison (voir la recette, 16 steaks pour 16 pains), cheddar, salade, tomate, oignon rouge, cornichons, avec du ketchup, de la mayonnaise ou de la sauce barbecue ; ou en version créole, avec du poulet pané ou des nuggets, des crudités et de la sauce chien.
