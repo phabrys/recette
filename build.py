@@ -22,6 +22,7 @@ EMOJIS = {
     "pancakes": "🥞",
     "pate-brisee": "🥧",
     "pate-feuilletee": "🥐",
+    "pate-sablee": "🍪",
     "pizza": "🍕",
 }
 DEFAULT_EMOJI = "🍽️"
