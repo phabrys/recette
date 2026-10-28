@@ -56,6 +56,5 @@ emoji: 🧆
 ## Variantes
 
 - **Accras de crevettes** : avec des crevettes crues coupées en morceaux à la place de la morue (voir la recette d'accras de crevettes).
-- **Accras de légumes** : remplacez la morue par 500 g de légumes râpés (giraumon, chou, carottes) ou des cœurs de palmier hachés.
-- **Accras de giraumon** : remplacez la morue par 500 g de giraumon cuit et écrasé, et ajoutez une pincée de muscade.
+- **Accras de légumes ou de giraumon** : avec des légumes râpés et bien pressés à la place de la morue (voir la recette d'accras de légumes).
 - **Plus légers** : remplacez la moitié de l'eau par de l'eau gazeuse bien froide.
