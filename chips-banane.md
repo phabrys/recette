@@ -38,7 +38,7 @@ emoji: 🍌
 - **Au citron vert** : arrosez-les d'un filet de jus de citron vert et parsemez de zeste juste avant de servir.
 - **À l'ail** : mélangez le sel avec un peu d'ail en poudre avant de saler les chips.
 - **Au four** : mélangez les rondelles avec 3 cuillères à soupe d'huile, étalez-les en une seule couche sur deux plaques recouvertes de papier cuisson et faites cuire **15 à 20 minutes à 180 °C**, en les retournant à mi-cuisson.
-- **Bananes pesées** : coupez la banane verte en tronçons de 3 cm, faites-les frire 4 minutes à 160 °C, aplatissez-les entre deux assiettes, puis refaites-les frire à 180 °C jusqu'à ce qu'elles soient dorées.
+- **Bananes pesées** : en tronçons frits deux fois et aplatis entre les deux cuissons (voir la recette de bananes pesées).
 - **Bananes jaunes mûres** : coupées en rondelles épaisses (1 cm) et frites, elles donnent des **alocos**, moelleux et sucrés, à servir en accompagnement.
 
 ## Idées d'accompagnement
