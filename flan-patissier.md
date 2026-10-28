@@ -1,3 +1,8 @@
+---
+categorie: Pâtisseries
+emoji: 🍮
+---
+
 # Flan pâtissier (2 flans de 24 cm)
 
 ## Ingrédients

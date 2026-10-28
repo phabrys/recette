@@ -13,26 +13,14 @@ OUT = ROOT / "site" / "index.html"
 TEMPLATE = ROOT / "template.html"
 IGNORED = {"readme.md"}
 
-# Émoji affiché sur la carte de chaque recette (clé = nom du fichier sans .md).
-EMOJIS = {
-    "beignets": "🍎",
-    "crepes": "🫓",
-    "gaufres": "🧇",
-    "pain": "🥖",
-    "pancakes": "🥞",
-    "pate-brisee": "🥧",
-    "pate-feuilletee": "🥐",
-    "pate-sablee": "🍓",
-    "pate-a-choux": "🧁",
-    "cookies": "🍪",
-    "gateau-au-yaourt": "🍰",
-    "quatre-quarts": "🧈",
-    "genoise": "🎂",
-    "brioche": "🍞",
-    "pain-au-beurre": "🌴",
-    "flan-patissier": "🍮",
-    "pizza": "🍕",
-}
+# Chaque recette peut commencer par un en-tête :
+#   ---
+#   categorie: Desserts
+#   emoji: 🍪
+#   ---
+# Ordre d'affichage des catégories sur l'accueil ; les autres suivent par ordre alphabétique.
+CATEGORIES = ["Plats", "Desserts", "Pâtisseries", "Pains et viennoiseries", "Bases"]
+DEFAULT_CATEGORY = "Divers"
 DEFAULT_EMOJI = "🍽️"
 
 
@@ -50,6 +38,23 @@ def capitalize(text):
 
 def sort_key(title):
     return unicodedata.normalize("NFD", title).encode("ascii", "ignore").decode().lower()
+
+
+def slugify(text):
+    return re.sub(r"[^a-z0-9]+", "-", sort_key(text)).strip("-")
+
+
+def split_meta(text):
+    """Sépare l'en-tête « --- clé: valeur --- » éventuel du reste de la recette."""
+    meta = {}
+    m = re.match(r"^---\n(.*?)\n---\n", text, re.S)
+    if m:
+        for line in m.group(1).splitlines():
+            if ":" in line:
+                key, value = line.split(":", 1)
+                meta[sort_key(key.strip())] = value.strip()
+        text = text[m.end():]
+    return meta, text
 
 
 def parse(text):
@@ -111,7 +116,8 @@ def parse(text):
 
 
 def build_recipe(path):
-    title, sections = parse(path.read_text(encoding="utf-8"))
+    meta, text = split_meta(path.read_text(encoding="utf-8"))
+    title, sections = parse(text)
     m = re.match(r"^(.*?)\s*\(([^)]*)\)\s*$", title)
     name, subtitle = (m.group(1), m.group(2)) if m else (title, "")
 
@@ -156,7 +162,8 @@ def build_recipe(path):
         "name": name,
         "nameHtml": inline(name),
         "subtitle": inline(subtitle),
-        "emoji": EMOJIS.get(path.stem, DEFAULT_EMOJI),
+        "emoji": meta.get("emoji") or DEFAULT_EMOJI,
+        "category": meta.get("categorie") or DEFAULT_CATEGORY,
         "ingredients": to_html(ingredients) if ingredients else None,
         "prep": [to_html(s) for s in prep],
         "other": [to_html(s) for s in other],
@@ -167,13 +174,26 @@ def build_recipe(path):
 def main():
     files = [p for p in ROOT.glob("*.md") if p.name.lower() not in IGNORED]
     recipes = sorted((build_recipe(p) for p in files), key=lambda r: sort_key(r["name"]))
-    data = json.dumps(recipes, ensure_ascii=False).replace("</", "<\\/")
-    page = TEMPLATE.read_text(encoding="utf-8").replace("/*__DATA__*/[]", data)
+    names = {r["category"] for r in recipes}
+    ordered = [c for c in CATEGORIES if c in names] + sorted(names - set(CATEGORIES), key=sort_key)
+    categories = [{"name": c, "nameHtml": inline(c), "slug": slugify(c)} for c in ordered]
+    for r in recipes:
+        r["categorySlug"] = slugify(r["category"])
+
+    def js(value):
+        return json.dumps(value, ensure_ascii=False).replace("</", "<\\/")
+
+    page = (TEMPLATE.read_text(encoding="utf-8")
+            .replace("/*__DATA__*/[]", js(recipes))
+            .replace("/*__CATEGORIES__*/[]", js(categories)))
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text(page, encoding="utf-8")
     print(f"{len(recipes)} recettes → {OUT.relative_to(ROOT)}")
-    for r in recipes:
-        print(f"  {r['emoji']} {r['name']} ({len(r['steps'])} étapes)")
+    for c in categories:
+        print(f"  {c['name']}")
+        for r in recipes:
+            if r["categorySlug"] == c["slug"]:
+                print(f"    {r['emoji']} {r['name']} ({len(r['steps'])} étapes)")
 
 
 if __name__ == "__main__":

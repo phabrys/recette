@@ -1,3 +1,8 @@
+---
+categorie: Bases
+emoji: 🍓
+---
+
 # Pâte sablée (2 fonds de tarte de 28 cm)
 
 ## Ingrédients

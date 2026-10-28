@@ -1,3 +1,8 @@
+---
+categorie: Desserts
+emoji: 🍎
+---
+
 # Beignets aux fruits (environ 40 beignets)
 
 ## Ingrédients

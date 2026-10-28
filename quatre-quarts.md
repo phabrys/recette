@@ -1,3 +1,8 @@
+---
+categorie: Pâtisseries
+emoji: 🧈
+---
+
 # Quatre-quarts (2 cakes de 25 cm)
 
 ## Ingrédients

@@ -1,3 +1,8 @@
+---
+categorie: Desserts
+emoji: 🧇
+---
+
 # Gaufres croustillantes (environ 24 gaufres)
 
 ## Ingrédients

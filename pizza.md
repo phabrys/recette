@@ -1,3 +1,8 @@
+---
+categorie: Bases
+emoji: 🍕
+---
+
 # Pâte à pizza (4 pizzas de 30 cm environ)
 
 ## Ingrédients

@@ -1,3 +1,8 @@
+---
+categorie: Bases
+emoji: 🥧
+---
+
 # Pâte brisée (2 fonds de tarte de 28 cm)
 
 ## Ingrédients

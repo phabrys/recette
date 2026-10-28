@@ -1,3 +1,8 @@
+---
+categorie: Bases
+emoji: 🥐
+---
+
 # Pâte feuilletée (environ 1,2 kg de pâte)
 
 ## Ingrédients

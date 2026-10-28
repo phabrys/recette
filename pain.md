@@ -1,3 +1,8 @@
+---
+categorie: Pains et viennoiseries
+emoji: 🥖
+---
+
 # Pain maison (2 gros pains ou 4 baguettes)
 
 ## Ingrédients

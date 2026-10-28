@@ -1,3 +1,8 @@
+---
+categorie: Pains et viennoiseries
+emoji: 🍞
+---
+
 # Brioche (2 brioches)
 
 ## Ingrédients

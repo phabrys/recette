@@ -75,6 +75,17 @@
   .card .ctitle { font-size: 1.45rem; font-weight: 700; }
   .card .csub { color: var(--muted); font-size: 1rem; }
 
+  .top.home { flex-wrap: wrap; row-gap: 1rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: .8rem; width: 100%; }
+  .chip {
+    background: var(--surface-2); border: .15rem solid transparent; border-radius: 2rem;
+    padding: .35rem 1.1rem; font-size: 1rem; font-weight: 600; cursor: pointer;
+  }
+  .chip:focus, .chip:hover { border-color: var(--accent); }
+  .chip span { color: var(--muted); font-weight: 400; margin-left: .3rem; }
+  .cat + .cat { margin-top: 2.4rem; }
+  .cathead { font-size: 1.5rem; color: var(--accent); margin: 0 0 1rem; }
+
   /* Fiche recette */
   .recipe {
     display: grid; gap: 2rem; align-content: start;
@@ -148,6 +159,7 @@
 (function () {
   "use strict";
   var RECIPES = /*__DATA__*/[];
+  var CATEGORIES = /*__CATEGORIES__*/[];
   var BY_SLUG = {};
   RECIPES.forEach(function (r) { BY_SLUG[r.slug] = r; });
   var app = document.getElementById("app");
@@ -202,21 +214,50 @@
       }).join("") + "</section>";
   }
 
+  function cardHtml(r) {
+    return '<a class="card nav" href="#/r/' + r.slug + '" data-go="#/r/' + r.slug + '" data-slug="' + r.slug + '">' +
+      '<span class="emoji">' + r.emoji + "</span>" +
+      '<span class="ctitle">' + r.nameHtml + "</span>" +
+      (r.subtitle ? '<span class="csub">' + r.subtitle + "</span>" : "") + "</a>";
+  }
+
   function renderHome() {
     document.title = "Mes recettes";
+    var groups = CATEGORIES.map(function (c) {
+      return { cat: c, recipes: RECIPES.filter(function (r) { return r.categorySlug === c.slug; }) };
+    });
     app.innerHTML =
-      '<header class="top"><div class="ttl"><h1>Mes recettes</h1>' +
+      '<header class="top home"><div class="ttl"><h1>Mes recettes</h1>' +
       '<p class="sub">' + RECIPES.length + " recettes</p></div>" +
-      '<p class="hint">◀ ▲ ▼ ▶ pour choisir · OK pour ouvrir</p></header>' +
-      '<main class="scroll"><div class="grid">' +
-      RECIPES.map(function (r) {
-        return '<a class="card nav" href="#/r/' + r.slug + '" data-go="#/r/' + r.slug + '" data-slug="' + r.slug + '">' +
-          '<span class="emoji">' + r.emoji + "</span>" +
-          '<span class="ctitle">' + r.nameHtml + "</span>" +
-          (r.subtitle ? '<span class="csub">' + r.subtitle + "</span>" : "") + "</a>";
-      }).join("") + "</div></main>";
+      '<p class="hint">◀ ▲ ▼ ▶ pour choisir · OK pour ouvrir</p>' +
+      (groups.length > 1 ? '<nav class="chips">' + groups.map(function (g) {
+        return '<button class="chip nav" data-jump="' + g.cat.slug + '">' + g.cat.nameHtml +
+          "<span>" + g.recipes.length + "</span></button>";
+      }).join("") + "</nav>" : "") +
+      "</header>" +
+      '<main class="scroll">' + groups.map(function (g) {
+        return '<section class="cat" id="cat-' + g.cat.slug + '">' +
+          '<h2 class="cathead">' + g.cat.nameHtml + "</h2>" +
+          '<div class="grid">' + g.recipes.map(cardHtml).join("") + "</div></section>";
+      }).join("") + "</main>";
     var target = lastSlug && app.querySelector('[data-slug="' + lastSlug + '"]');
     focusEl(target || app.querySelector(".card"));
+  }
+
+  // Saute à une catégorie depuis la rangée de raccourcis
+  function jumpTo(slug) {
+    var sec = document.getElementById("cat-" + slug);
+    var sc = app.querySelector(".scroll");
+    if (!sec || !sc) return;
+    sec.querySelector(".card").focus({ preventScroll: true });
+    sc.scrollBy({ top: sec.getBoundingClientRect().top - sc.getBoundingClientRect().top - 16, behavior: "smooth" });
+  }
+
+  function categoryName(r) {
+    for (var i = 0; i < CATEGORIES.length; i++) {
+      if (CATEGORIES[i].slug === r.categorySlug) return CATEGORIES[i].nameHtml;
+    }
+    return "";
   }
 
   function renderRecipe(r) {
@@ -226,7 +267,7 @@
       '<header class="top">' +
       '<button class="btn nav" data-back>← Recettes</button>' +
       '<div class="ttl"><h1>' + r.emoji + " " + r.nameHtml + "</h1>" +
-      (r.subtitle ? '<p class="sub">' + r.subtitle + "</p>" : "") + "</div>" +
+      '<p class="sub">' + categoryName(r) + (r.subtitle ? " · " + r.subtitle : "") + "</p></div>" +
       (hasSteps ? '<button class="btn primary nav" id="start" data-go="#/r/' + r.slug + '/etape/1">▶ Pas à pas</button>' : "") +
       "</header>" +
       '<main class="scroll recipe">' +
@@ -299,7 +340,19 @@
   function focusEl(el) {
     if (!el) return;
     el.focus({ preventScroll: true });
-    if (el.scrollIntoView) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    var sc = el.classList.contains("card") && app.querySelector(".scroll");
+    if (!sc) {
+      if (el.scrollIntoView) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      return;
+    }
+    // Garde la carte visible ; sur la première rangée d'une catégorie, montre aussi son titre
+    var sec = el.closest(".cat");
+    var firstRow = sec && sec.querySelector(".card").offsetTop === el.offsetTop;
+    var view = sc.getBoundingClientRect(), card = el.getBoundingClientRect();
+    var top = firstRow ? sec.getBoundingClientRect().top : card.top;
+    var pad = 16;
+    if (top < view.top + pad) sc.scrollBy({ top: top - view.top - pad, behavior: "smooth" });
+    else if (card.bottom > view.bottom - pad) sc.scrollBy({ top: card.bottom - view.bottom + pad, behavior: "smooth" });
   }
 
   function moveFocus(dir) {
@@ -355,10 +408,11 @@
   });
 
   app.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-go],[data-back],[data-step]");
+    var t = e.target.closest("[data-go],[data-back],[data-step],[data-jump]");
     if (!t) return;
     e.preventDefault();
-    if (t.hasAttribute("data-back")) goBack();
+    if (t.hasAttribute("data-jump")) jumpTo(t.getAttribute("data-jump"));
+    else if (t.hasAttribute("data-back")) goBack();
     else if (t.hasAttribute("data-step")) changeStep(parseInt(t.getAttribute("data-step"), 10));
     else go(t.getAttribute("data-go"));
   });

@@ -1,3 +1,8 @@
+---
+categorie: Pains et viennoiseries
+emoji: 🌴
+---
+
 # Pain au beurre antillais (4 pains moyens)
 
 ## Ingrédients

@@ -1,3 +1,8 @@
+---
+categorie: Pâtisseries
+emoji: 🍪
+---
+
 # Cookies au chocolat (environ 30 cookies)
 
 ## Ingrédients

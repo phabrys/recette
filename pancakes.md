@@ -1,3 +1,8 @@
+---
+categorie: Desserts
+emoji: 🥞
+---
+
 # Pancakes moelleux (environ 24 pancakes)
 
 ## Ingrédients

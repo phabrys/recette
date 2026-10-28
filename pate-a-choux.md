@@ -1,3 +1,8 @@
+---
+categorie: Bases
+emoji: 🧁
+---
+
 # Pâte à choux (environ 60 choux ou 30 éclairs)
 
 ## Ingrédients

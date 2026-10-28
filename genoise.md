@@ -1,3 +1,8 @@
+---
+categorie: Pâtisseries
+emoji: 🎂
+---
+
 # Génoise (2 génoises de 24 cm)
 
 ## Ingrédients

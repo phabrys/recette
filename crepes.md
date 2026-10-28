@@ -1,3 +1,8 @@
+---
+categorie: Desserts
+emoji: 🫓
+---
+
 # Crêpes classiques (environ 30 crêpes)
 
 ## Ingrédients

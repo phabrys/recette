@@ -1,3 +1,8 @@
+---
+categorie: Pâtisseries
+emoji: 🍰
+---
+
 # Gâteau au yaourt (2 gâteaux de 24 cm)
 
 ## Ingrédients
