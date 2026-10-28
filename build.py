@@ -28,6 +28,8 @@ EMOJIS = {
     "gateau-au-yaourt": "🍰",
     "quatre-quarts": "🧈",
     "genoise": "🎂",
+    "brioche": "🍞",
+    "pain-au-beurre": "🌴",
     "pizza": "🍕",
 }
 DEFAULT_EMOJI = "🍽️"
