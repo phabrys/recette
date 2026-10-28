@@ -49,7 +49,7 @@ emoji: 🥣
 
 ## Variantes
 
-- **Dombrés aux haricots rouges** : remplacez les crevettes par 4 boîtes de haricots rouges cuits (ou 1 kg de haricots secs cuits, voir la recette de haricots rouges) et 300 g de lard fumé en dés, revenus avec les oignons.
+- **Dombrés aux haricots rouges** : voir la recette, avec du lard ou de la viande salée.
 - **Dombrés au poulet** : avec 1,5 kg de poulet en petits morceaux, dorés au début et mijotés 30 minutes avant d'ajouter les dombrés.
 - **Dombrés à la morue** : avec 800 g de morue dessalée et émiettée, ajoutée 5 minutes avant la fin.
 

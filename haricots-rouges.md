@@ -42,7 +42,7 @@ emoji: 🥫
 
 - **Riz et pois** : mélangez les haricots rouges cuits avec le riz blanc, ou faites cuire le riz directement dans le bouillon des haricots.
 - **Au lait de coco** : ajoutez 40 cl de lait de coco à l'étape 5, pour une version plus douce.
-- **Dombrés aux haricots rouges** : voir la recette de dombrés.
+- **Dombrés aux haricots rouges** : voir la recette.
 - **Végétariens** : supprimez la viande et ajoutez des dés de giraumon pour les 30 dernières minutes.
 
 ## Idées d'accompagnement

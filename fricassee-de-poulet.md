@@ -48,7 +48,8 @@ emoji: 🍲
 
 ## Variantes
 
-- **Fricassée de lambi, de chatrous ou de ouassous** : adaptez la cuisson (lambi et chatrous attendris 45 minutes à l'autocuiseur, ouassous 8 minutes seulement).
+- **Fricassée de lambi** : voir la recette.
+- **Fricassée de chatrous ou de ouassous** : adaptez la cuisson (chatrous attendris 30 minutes à l'autocuiseur, ouassous 8 minutes seulement).
 - **Fricassée de cabri** : avec 3 kg de cabri, mijoté **1 h 30**.
 - **Au lait de coco** : ajoutez 40 cl de lait de coco à la place de la moitié de l'eau.
 
