@@ -32,7 +32,8 @@ emoji: 🧃
 
 ## Variantes
 
-- **Jus de goyave** : mixez 1 kg de goyaves coupées en morceaux avec 50 cl d'eau, filtrez pour retirer les pépins, puis allongez et sucrez de la même façon.
+- **Jus de goyave** : même principe, avec des goyaves mixées et filtrées (voir la recette de jus de goyave).
+- **Punch maracudja** : voir la recette, pour la version macérée au rhum.
 - **Au lait** : remplacez la moitié de l'eau par du lait bien froid (ou du lait concentré sucré, en supprimant le sucre), et mixez avec des glaçons pour un jus onctueux.
 - **Maracudja-orange** : remplacez 50 cl d'eau par du jus d'orange.
 - **Pétillant** : allongez avec de l'eau gazeuse au moment de servir.

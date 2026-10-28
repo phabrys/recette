@@ -38,4 +38,5 @@ emoji: 🥥
 
 - **À la noix de coco fraîche** : râpez la chair de 2 noix de coco, mixez-la avec 60 cl d'eau chaude et filtrez à travers un torchon pour obtenir un lait de coco maison.
 - **Punch coco sans alcool** : remplacez le rhum par du lait, et ajoutez un peu plus de vanille. À conserver seulement 3 jours.
+- **Punch coco-ananas** : ajoutez 50 cl de jus d'ananas (ou 400 g d'ananas frais mixé et filtré) et réduisez le lait entier de moitié. À conserver 1 semaine seulement.
 - **Punch cacahuète** : remplacez le lait de coco par 200 g de beurre de cacahuète mixé avec 60 cl de lait.
