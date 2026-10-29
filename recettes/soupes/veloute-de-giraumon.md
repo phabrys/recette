@@ -1,5 +1,5 @@
 ---
-categorie: Plats
+categorie: Soupes
 emoji: 🎃
 ---
 
