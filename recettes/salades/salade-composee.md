@@ -1,5 +1,5 @@
 ---
-categorie: Plats
+categorie: Salades
 emoji: 🥗
 ---
 
