@@ -104,6 +104,27 @@
   .extras { grid-column: 1 / -1; display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr)); }
   .extras ul { font-size: 1.05rem; }
 
+  /* Liste de courses */
+  .shop { display: grid; gap: 1.6rem 2rem; grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr)); align-items: start; }
+  .shop h3 { font-size: 1.15rem; color: var(--accent); margin: 0 0 .5rem; }
+  .check {
+    display: flex; align-items: flex-start; gap: .8rem; width: 100%; text-align: left;
+    background: var(--surface); border: .15rem solid transparent; border-radius: .8rem;
+    padding: .6rem .9rem; margin: 0 0 .5rem; font-size: 1.1rem; cursor: pointer; color: var(--muted);
+  }
+  .check::before {
+    content: ""; flex: none; width: 1.3rem; height: 1.3rem; margin-top: .1rem;
+    border: .15rem solid var(--line); border-radius: .35rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .95rem; font-weight: 800; color: var(--accent-ink);
+  }
+  .check[aria-checked="true"] { color: var(--text); }
+  .check[aria-checked="true"]::before { content: "✓"; background: var(--accent); border-color: var(--accent); }
+  .check:focus, .check:hover { outline: none; border-color: var(--accent); background: var(--surface-2); }
+  .shopmsg { margin: 0 0 1.4rem; font-size: 1.15rem; color: var(--muted); min-height: 1.6rem; }
+  .shopmsg.ok { color: #9fd89a; }
+  .shopmsg.err { color: #ff9b8a; }
+
   /* Mode pas à pas */
   .progress { height: .4rem; background: var(--surface-2); flex: none; }
   .progress div { height: 100%; background: var(--accent); transition: width .25s ease; }
@@ -157,11 +178,16 @@
   var CATEGORIES = /*__CATEGORIES__*/[];
   var BY_SLUG = {};
   RECIPES.forEach(function (r) { BY_SLUG[r.slug] = r; });
+  // Automatisation Home Assistant qui ajoute les ingrédients à todo.shopping_list
+  // (webhook « local_only » : n'accepte que les appels du réseau local)
+  var HA_WEBHOOK = "https://homeassistant.d.perivol.net/api/webhook/recettes-courses-foTh1ZgsdSDpRFjhsT12Q0zk";
   var app = document.getElementById("app");
   var view = { name: "home" };
   var lastSlug = null;
   var lastCat = null;
   var lastStep = 0;
+  var shopSel = {};  // Cases cochées de la liste de courses, par recette
+  var sending = false;
 
   // ---------- Routage (hash) ----------
   function findCategory(slug) {
@@ -177,9 +203,10 @@
   function parseRoute() {
     var c = /^#\/c\/([^\/]+)$/.exec(location.hash);
     if (c && findCategory(c[1])) return { name: "category", cat: findCategory(c[1]) };
-    var m = /^#\/r\/([^\/]+)(?:\/etape\/(\d+))?$/.exec(location.hash);
+    var m = /^#\/r\/([^\/]+)(?:\/etape\/(\d+)|\/(courses))?$/.exec(location.hash);
     if (!m || !BY_SLUG[m[1]]) return { name: "home" };
     var r = BY_SLUG[m[1]];
+    if (m[3] && r.shopping.length) return { name: "shop", recipe: r };
     if (m[2] && r.steps.length) {
       var n = Math.min(Math.max(parseInt(m[2], 10), 1), r.steps.length);
       return { name: "step", recipe: r, n: n };
@@ -187,7 +214,7 @@
     return { name: "recipe", recipe: r };
   }
   function parentHash(v) {
-    if (v.name === "step") return "#/r/" + v.recipe.slug;
+    if (v.name === "step" || v.name === "shop") return "#/r/" + v.recipe.slug;
     if (v.name === "recipe") return "#/c/" + v.recipe.categorySlug;
     return "#/";
   }
@@ -271,6 +298,7 @@
       '<button class="btn nav" data-back>← ' + findCategory(r.categorySlug).nameHtml + "</button>" +
       '<div class="ttl"><h1>' + r.emoji + " " + r.nameHtml + "</h1>" +
       (r.subtitle ? '<p class="sub">' + r.subtitle + "</p>" : "") + "</div>" +
+      (r.shopping.length ? '<button class="btn nav" data-go="#/r/' + r.slug + '/courses">🛒 Courses</button>' : "") +
       (hasSteps ? '<button class="btn primary nav" id="start" data-go="#/r/' + r.slug + '/etape/1">▶ Pas à pas</button>' : "") +
       "</header>" +
       '<main class="scroll recipe">' +
@@ -279,6 +307,84 @@
       (r.other.length ? '<div class="extras">' + r.other.map(function (s) { return sectionHtml(s); }).join("") + "</div>" : "") +
       "</main>";
     focusEl(document.getElementById("start") || app.querySelector(".nav"));
+  }
+
+  function esc(text) {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function shopItems(r) {
+    var list = [];
+    r.shopping.forEach(function (g) { list = list.concat(g.items); });
+    return list;
+  }
+
+  function selection(r) {
+    if (!shopSel[r.slug]) shopSel[r.slug] = shopItems(r).map(function (it) { return !it.opt; });
+    return shopSel[r.slug];
+  }
+
+  function sendLabel(r) {
+    var n = selection(r).filter(Boolean).length;
+    return n ? "Ajouter " + n + (n > 1 ? " articles" : " article") : "Rien à ajouter";
+  }
+
+  function renderShop(r) {
+    document.title = r.name + " – courses";
+    var sel = selection(r);
+    var i = 0;
+    app.innerHTML =
+      '<header class="top">' +
+      '<button class="btn nav" data-back>← Recette</button>' +
+      '<div class="ttl"><h1>🛒 ' + r.nameHtml + "</h1>" +
+      '<p class="sub">Cochez ce qu\'il faut acheter</p></div>' +
+      '<button class="btn primary nav" id="send" data-send>' + sendLabel(r) + "</button>" +
+      "</header>" +
+      '<main class="scroll"><p class="shopmsg" id="shopmsg" role="status"></p><div class="shop">' +
+      r.shopping.map(function (g) {
+        return "<section>" + (g.title ? "<h3>" + esc(g.title) + "</h3>" : "") +
+          g.items.map(function (it) {
+            var k = i++;
+            return '<button class="check nav" role="checkbox" aria-checked="' + sel[k] + '" data-item="' + k + '">' +
+              esc(it.text) + "</button>";
+          }).join("") + "</section>";
+      }).join("") + "</div></main>";
+    focusEl(document.getElementById("send"));
+  }
+
+  function toggleItem(el) {
+    var sel = selection(view.recipe);
+    var k = parseInt(el.getAttribute("data-item"), 10);
+    sel[k] = !sel[k];
+    el.setAttribute("aria-checked", sel[k]);
+    document.getElementById("send").textContent = sendLabel(view.recipe);
+  }
+
+  function shopStatus(text, cls) {
+    var msg = document.getElementById("shopmsg");
+    if (!msg) return;
+    msg.textContent = text;
+    msg.className = "shopmsg " + (cls || "");
+  }
+
+  // Envoi en « no-cors » (formulaire simple, sans requête préalable) : la réponse
+  // n'est pas lisible, seule une erreur réseau signale un échec
+  function sendShopping() {
+    var r = view.recipe;
+    var sel = selection(r);
+    var items = shopItems(r).filter(function (it, k) { return sel[k]; }).map(function (it) { return it.text; });
+    if (!items.length || sending) return;
+    sending = true;
+    shopStatus("Envoi à Home Assistant…");
+    fetch(HA_WEBHOOK, {
+      method: "POST",
+      mode: "no-cors",
+      body: new URLSearchParams({ recette: r.name, ingredients: items.join("\n") })
+    }).then(function () {
+      shopStatus("✓ " + items.length + (items.length > 1 ? " articles ajoutés" : " article ajouté") + " à la liste de courses", "ok");
+    }).catch(function () {
+      shopStatus("Home Assistant ne répond pas : êtes-vous sur le réseau de la maison ?", "err");
+    }).then(function () { sending = false; });
   }
 
   function sizeClass(htmlText) {
@@ -346,6 +452,10 @@
       lastSlug = view.recipe.slug;
       lastCat = view.recipe.categorySlug;
       renderRecipe(view.recipe);
+    }
+    else if (view.name === "shop") {
+      lastSlug = view.recipe.slug;
+      renderShop(view.recipe);
     }
     else {
       if (prev.name !== "step" || prev.recipe !== view.recipe) lastStep = 0;
@@ -431,10 +541,12 @@
   });
 
   app.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-go],[data-back],[data-step]");
+    var t = e.target.closest("[data-go],[data-back],[data-step],[data-item],[data-send]");
     if (!t) return;
     e.preventDefault();
     if (t.hasAttribute("data-back")) goBack();
+    else if (t.hasAttribute("data-item")) toggleItem(t);
+    else if (t.hasAttribute("data-send")) sendShopping();
     else if (t.hasAttribute("data-step")) changeStep(parseInt(t.getAttribute("data-step"), 10));
     else go(t.getAttribute("data-go"));
   });

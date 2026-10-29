@@ -1,0 +1,26 @@
+# Automatisation Home Assistant : reçoit les ingrédients envoyés par le site de
+# recettes (bouton « 🛒 Courses ») et les ajoute à la liste de courses.
+# À coller dans Paramètres → Automatisations → Nouvelle → ⋮ → Modifier en YAML.
+# Le webhook_id doit correspondre à HA_WEBHOOK dans template.html.
+alias: Recettes → liste de courses
+description: Ajoute à la liste de courses les ingrédients envoyés par le site de recettes
+mode: queued
+triggers:
+  - trigger: webhook
+    webhook_id: recettes-courses-foTh1ZgsdSDpRFjhsT12Q0zk
+    allowed_methods:
+      - POST
+    local_only: true
+conditions:
+  - condition: template
+    value_template: "{{ trigger.data is defined and trigger.data.ingredients is defined }}"
+actions:
+  - repeat:
+      # Une ligne par ingrédient, plafonné à 60 articles par envoi
+      for_each: "{{ (trigger.data.ingredients.splitlines() | map('trim') | reject('eq', '') | list)[:60] }}"
+      sequence:
+        - action: todo.add_item
+          target:
+            entity_id: todo.shopping_list
+          data:
+            item: "{{ repeat.item }}"

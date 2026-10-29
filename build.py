@@ -23,6 +23,8 @@ IGNORED = {"readme.md"}
 CATEGORIES = ["Entrées et apéritifs", "Soupes", "Salades", "Plats", "Gratins", "Accompagnements", "Desserts", "Pâtisseries", "Pains et viennoiseries", "Boissons", "Cocktails", "Cocktails sans alcool", "Bases"]
 DEFAULT_CATEGORY = "Divers"
 DEFAULT_EMOJI = "🍽️"
+# Ingrédients décochés par défaut dans la liste de courses
+OPTIONAL = re.compile(r"facultati|^un peu d", re.I)
 
 
 def inline(text):
@@ -31,6 +33,11 @@ def inline(text):
     text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
     text = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<em>\1</em>", text)
     return text
+
+
+def plain(text):
+    """Retire le Markdown en ligne (gras, italique) pour obtenir du texte brut."""
+    return re.sub(r"\*+", "", text).strip()
 
 
 def capitalize(text):
@@ -158,6 +165,16 @@ def build_recipe(path):
             other.append(sec)
     prep = [s for s in sections if "prépar" in s["title"].lower()]
 
+    # Ingrédients en texte brut, groupés par sous-titre, pour la liste de courses
+    shopping = []
+    for sub in (ingredients or {"subs": []})["subs"]:
+        items = [plain(r) for b in sub["blocks"] if b["t"] == "ul" for r in b["raw"]]
+        if items:
+            shopping.append({
+                "title": plain(sub["title"]),
+                "items": [{"text": t, "opt": bool(OPTIONAL.search(t))} for t in items],
+            })
+
     return {
         "slug": path.stem,
         "name": name,
@@ -169,6 +186,7 @@ def build_recipe(path):
         "prep": [to_html(s) for s in prep],
         "other": [to_html(s) for s in other],
         "steps": steps,
+        "shopping": shopping,
     }
 
 
