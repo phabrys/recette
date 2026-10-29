@@ -51,7 +51,7 @@ emoji: 🍢
 ## Astuces
 
 - **Le tteokbokki** est le plat de rue le plus populaire de Corée : des gâteaux de riz moelleux et collants dans une sauce rouge sucrée-pimentée.
-- **Les tteok, le gochujang et l'eomuk** se trouvent dans les épiceries asiatiques, au rayon frais ou surgelé.
+- **Les tteok, le gochujang et l'eomuk** se trouvent dans les épiceries asiatiques, au rayon frais ou surgelé. Les tteok se font aussi maison (voir la recette des tteok, dans les bases).
 - **La sauce épaissit** en refroidissant et les tteok durcissent : le plat se mange dès qu'il sort du feu.
 - **Moins piquant** : supprimez le gochugaru et remplacez 2 cuillères de gochujang par 2 cuillères de ketchup, pour les enfants.
 - **Sans bouillon d'anchois** : l'eau seule fonctionne, mais le kombu donne beaucoup de goût.
