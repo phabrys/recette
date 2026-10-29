@@ -19,8 +19,6 @@ IGNORED = {"readme.md"}
 #   categorie: Desserts
 #   emoji: 🍪
 #   ---
-# Ordre d'affichage des catégories sur l'accueil ; les autres suivent par ordre alphabétique.
-CATEGORIES = ["Entrées et apéritifs", "Soupes", "Salades", "Plats", "Gratins", "Accompagnements", "Desserts", "Pâtisseries", "Pains et viennoiseries", "Boissons", "Cocktails", "Cocktails sans alcool", "Bases"]
 DEFAULT_CATEGORY = "Divers"
 DEFAULT_EMOJI = "🍽️"
 # Ingrédients décochés par défaut dans la liste de courses
@@ -199,8 +197,7 @@ def main():
             print(f"⚠ {p.relative_to(ROOT)} : catégorie « {r['category']} », à ranger dans recettes/{slugify(r['category'])}/")
         recipes.append(r)
     recipes.sort(key=lambda r: sort_key(r["name"]))
-    names = {r["category"] for r in recipes}
-    ordered = [c for c in CATEGORIES if c in names] + sorted(names - set(CATEGORIES), key=sort_key)
+    ordered = sorted({r["category"] for r in recipes}, key=sort_key)
     categories = [{"name": c, "nameHtml": inline(c), "slug": slugify(c)} for c in ordered]
     for r in recipes:
         r["categorySlug"] = slugify(r["category"])
