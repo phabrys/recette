@@ -171,6 +171,8 @@
 </head>
 <body>
 <div id="app"></div>
+<!-- Réglages locaux, non suivis par git (voir config.example.js) -->
+<script src="config.js"></script>
 <script>
 (function () {
   "use strict";
@@ -179,8 +181,9 @@
   var BY_SLUG = {};
   RECIPES.forEach(function (r) { BY_SLUG[r.slug] = r; });
   // Automatisation Home Assistant qui ajoute les ingrédients à todo.shopping_list
-  // (webhook « local_only » : n'accepte que les appels du réseau local)
-  var HA_WEBHOOK = "https://homeassistant.d.perivol.net/api/webhook/recettes-courses-foTh1ZgsdSDpRFjhsT12Q0zk";
+  // (webhook « local_only » : n'accepte que les appels du réseau local).
+  // Sans config.js, le bouton « Courses » n'apparaît pas
+  var HA_WEBHOOK = (window.RECETTES_CONFIG || {}).haWebhook || "";
   var app = document.getElementById("app");
   var view = { name: "home" };
   var lastSlug = null;
@@ -206,7 +209,7 @@
     var m = /^#\/r\/([^\/]+)(?:\/etape\/(\d+)|\/(courses))?$/.exec(location.hash);
     if (!m || !BY_SLUG[m[1]]) return { name: "home" };
     var r = BY_SLUG[m[1]];
-    if (m[3] && r.shopping.length) return { name: "shop", recipe: r };
+    if (m[3] && HA_WEBHOOK && r.shopping.length) return { name: "shop", recipe: r };
     if (m[2] && r.steps.length) {
       var n = Math.min(Math.max(parseInt(m[2], 10), 1), r.steps.length);
       return { name: "step", recipe: r, n: n };
@@ -298,7 +301,7 @@
       '<button class="btn nav" data-back>← ' + findCategory(r.categorySlug).nameHtml + "</button>" +
       '<div class="ttl"><h1>' + r.emoji + " " + r.nameHtml + "</h1>" +
       (r.subtitle ? '<p class="sub">' + r.subtitle + "</p>" : "") + "</div>" +
-      (r.shopping.length ? '<button class="btn nav" data-go="#/r/' + r.slug + '/courses">🛒 Courses</button>' : "") +
+      (HA_WEBHOOK && r.shopping.length ? '<button class="btn nav" data-go="#/r/' + r.slug + '/courses">🛒 Courses</button>' : "") +
       (hasSteps ? '<button class="btn primary nav" id="start" data-go="#/r/' + r.slug + '/etape/1">▶ Pas à pas</button>' : "") +
       "</header>" +
       '<main class="scroll recipe">' +

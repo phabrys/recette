@@ -1,13 +1,13 @@
 # Automatisation Home Assistant : reçoit les ingrédients envoyés par le site de
 # recettes (bouton « 🛒 Courses ») et les ajoute à la liste de courses.
 # À coller dans Paramètres → Automatisations → Nouvelle → ⋮ → Modifier en YAML.
-# Le webhook_id doit correspondre à HA_WEBHOOK dans template.html.
+# Remplacer webhook_id par l'identifiant secret de site/config.js (non suivi par git).
 alias: Recettes → liste de courses
 description: Ajoute à la liste de courses les ingrédients envoyés par le site de recettes
 mode: queued
 triggers:
   - trigger: webhook
-    webhook_id: recettes-courses-foTh1ZgsdSDpRFjhsT12Q0zk
+    webhook_id: recettes-courses-CHANGEZ-MOI
     allowed_methods:
       - POST
     local_only: true
