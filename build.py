@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Génère site/index.html (recueil de recettes pour TV) à partir des fichiers .md du dossier."""
+"""Génère site/index.html (recueil de recettes pour TV) à partir des fichiers .md de recettes/<catégorie>/."""
 
 import html
 import json
@@ -9,6 +9,7 @@ import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+RECIPES = ROOT / "recettes"
 OUT = ROOT / "site" / "index.html"
 TEMPLATE = ROOT / "template.html"
 IGNORED = {"readme.md"}
@@ -172,8 +173,14 @@ def build_recipe(path):
 
 
 def main():
-    files = [p for p in ROOT.glob("*.md") if p.name.lower() not in IGNORED]
-    recipes = sorted((build_recipe(p) for p in files), key=lambda r: sort_key(r["name"]))
+    files = [p for p in RECIPES.rglob("*.md") if p.name.lower() not in IGNORED]
+    recipes = []
+    for p in files:
+        r = build_recipe(p)
+        if p.parent.name != slugify(r["category"]):
+            print(f"⚠ {p.relative_to(ROOT)} : catégorie « {r['category']} », à ranger dans recettes/{slugify(r['category'])}/")
+        recipes.append(r)
+    recipes.sort(key=lambda r: sort_key(r["name"]))
     names = {r["category"] for r in recipes}
     ordered = [c for c in CATEGORIES if c in names] + sorted(names - set(CATEGORIES), key=sort_key)
     categories = [{"name": c, "nameHtml": inline(c), "slug": slugify(c)} for c in ordered]
