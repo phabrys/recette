@@ -8,7 +8,7 @@ emoji: 🍚
 ## Ingrédients
 
 - 500 g de riz long grain (environ 2 tasses ½ ou 600 ml)
-- 750 ml d'eau (1 volume ½ d'eau pour 1 volume de riz)
+- 750 ml d'eau (1 volume ¼ d'eau pour 1 volume de riz, soit 1,5 fois son poids)
 - 2 cuillères à soupe d'huile (ou 30 g de beurre)
 - 2 cuillères à café de sel fin
 

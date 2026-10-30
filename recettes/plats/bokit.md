@@ -11,7 +11,7 @@ emoji: 🥙
 
 - 1 kg de farine T45 ou T55
 - 55 cl d'eau tiède
-- 15 g de levure de boulanger sèche (2 sachets) ou 30 g de levure fraîche
+- 2 sachets de levure de boulanger sèche (14 g) ou 40 g de levure fraîche
 - 20 g de sel
 - 2 cuillères à café de sucre
 - 4 cuillères à soupe d'huile (ou 50 g de saindoux, comme à l'ancienne)

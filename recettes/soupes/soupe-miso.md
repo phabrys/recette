@@ -8,7 +8,7 @@ emoji: 🥣
 ## Ingrédients
 
 - 2 litres d'eau
-- 20 g de dashi en poudre (bouillon japonais), ou 2 cubes de bouillon de légumes
+- 10 g de dashi en poudre (bouillon japonais), ou 2 cubes de bouillon de légumes
 - 8 cuillères à soupe de pâte miso (blanche ou brune, environ 160 g)
 - 400 g de tofu soyeux ou ferme
 - 4 cuillères à soupe d'algues wakamé séchées

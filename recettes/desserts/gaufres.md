@@ -8,7 +8,7 @@ emoji: 🧇
 ## Ingrédients
 
 - 500 g de farine
-- 2 sachets de levure chimique (22 g)
+- 1 sachet de levure chimique (11 g)
 - 6 œufs
 - 1 litre de lait
 - 200 g de beurre fondu
